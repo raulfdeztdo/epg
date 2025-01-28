@@ -4,4 +4,4 @@
 npm install
 
 # Ejecuta el comando grab para movistarplus.es
-npm run grab --- --site=movistarplus.es
+npm run grab --- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --maxConnections=5

@@ -20,7 +20,7 @@ jobs:
         run: npm install
 
       - name: Run grab for Movistar+
-        run: npm run grab --- --site=movistarplus.es
+        run: npm run grab --- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --maxConnections=5
 
       - name: Commit and push changes
         run: |

@@ -178,4 +178,23 @@
   <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="usop11">M+ Deportes 5</channel>
   <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="vamosd">M+ Vamos</channel>
   <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="vh1">MTV 00s</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CanalHollywood.es" site_id="61">Hollywood</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CanalCocina.es" site_id="183">Canal Cocina</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="AMC.es" site_id="481">AMC</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="492">AMC Break</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="691">AMC Crime</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="SolMusica.es" site_id="171">Buen viaje</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CMMTV.es" site_id="296">Castilla - La Mancha TV</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Dark.es" site_id="920">Dark</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Decasa.es" site_id="572">Decasa</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CanalPanda.es" site_id="698">En familia</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Historia.es" site_id="148">Historia</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CaracolInternacional.co" site_id="566">Caracol TV</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="603">Libertad Digital TV</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="705">MTV 80s</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="MTVHitsEurope.uk" site_id="161">MTV Hits</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Odisea.es" site_id="135">Odisea</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Somos.es" site_id="501">Somos</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="SundanceTV.es" site_id="699">Sundance Channel</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="XTRM.es" site_id="68">XTRM</channel>
 </channels>
