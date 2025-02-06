@@ -27,5 +27,5 @@ jobs:
           git config --global user.name "Raúl Fernández"
           git config --global user.email "raulfdeztdo@gmail.com"
           git add .
-          git commit -m "Actualización EPG"
+          git commit -m "[BOT] Actualización EPG"
           git push https://${{ secrets.GH_TOKEN }}@github.com/raulfdeztdo/epg.git
