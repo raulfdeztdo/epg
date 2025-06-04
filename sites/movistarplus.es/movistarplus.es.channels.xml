@@ -197,4 +197,5 @@
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Somos.es" site_id="501">Somos</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="SundanceTV.es" site_id="699">Sundance Channel</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="XTRM.es" site_id="68">XTRM</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CineporMovistarPlusPlus.es" site_id="845">Movistar Estrenos</channel>
 </channels>
