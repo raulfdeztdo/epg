@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <channels>
+  <channel site="programacion-tv.elpais.com" lang="en" xmltv_id="CNBCEurope.uk" site_id="204">CNBC</channel>
+  <channel site="programacion-tv.elpais.com" lang="en" xmltv_id="CNNInternationalEurope.us" site_id="203">CNN Internacional</channel>
+  <channel site="programacion-tv.elpais.com" lang="en" xmltv_id="ExtremeSportsChannel.nl" site_id="550">Extreme Sports</channel>
+  <channel site="programacion-tv.elpais.com" lang="en" xmltv_id="i24NEWSEnglishWorld.il" site_id="792">i24 News</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="18">La 1 Catalunya</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="32">Andalucía TV</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="34">ETB 2</channel>
@@ -12,6 +16,7 @@
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="165">MTV00</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="174">Disney XD</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="196">Bloomberg</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="202">Star</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="242">betevé</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="280">La 2 Catalunya</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="291">Disney Channel +1</channel>
@@ -24,7 +29,7 @@
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="469">MTV Dance</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="492">AMC Break</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="519">IB3</channel>
-  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="521">TPA</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="521">TPA_7</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="575">Classica</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="589">Canal de las Estrellas Europa</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="594">TVE América I</channel>
@@ -116,10 +121,8 @@
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CazayPesca.es" site_id="386">Caza y Pesca</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CineEspanolporMovistarPlusPlus.es" site_id="385">Movistar Cine Español</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CineporMovistarPlusPlus.es" site_id="845">Movistar Estrenos</channel>
-  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Clan.es" site_id="505">Clan TVE</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Clan.es" site_id="505">Clan</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CMMTV.es" site_id="296">Castilla - La Mancha TV</channel>
-  <channel site="programacion-tv.elpais.com" lang="en" xmltv_id="CNBCEurope.uk" site_id="204">CNBC</channel>
-  <channel site="programacion-tv.elpais.com" lang="en" xmltv_id="CNNInternationalEurope.us" site_id="203">CNN Internacional</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="ComediaporMovistarPlusPlus.es" site_id="848">Movistar Comedia</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="ComedyCentral.es" site_id="493">Comedy Central</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="COSMO.es" site_id="186">Cosmopolitan</channel>
@@ -136,21 +139,17 @@
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="DWEspanol.de" site_id="206">Deutsche Welle</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="ElToroTV.es" site_id="516">El Toro TV</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Energy.es" site_id="709">Energy</channel>
-  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="ETB1.es" site_id="33">ETB 1</channel>
+  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="ETB1.es" site_id="33">ETB 1 HD</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="ETB3.es" site_id="795">ETB 3</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="EuronewsSpanish.fr" site_id="139">Euronews</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Eurosport1.fr" site_id="154">Eurosport</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Eurosport2.fr" site_id="491">Eurosport 2</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="EWTNEspanaLatinAmerica.us" site_id="190">EWTN</channel>
-  <channel site="programacion-tv.elpais.com" lang="en" xmltv_id="ExtremeSportsChannel.nl" site_id="550">Extreme Sports</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="FactoriadeFiccion.es" site_id="506">FDF Telecinco</channel>
-  <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="202">FOX</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="FoxLife.es" site_id="660">Fox Life</channel>
-  <channel site="programacion-tv.elpais.com" lang="fr" xmltv_id="France24Espanol.fr" site_id="608">France 24</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="GaliciaTVEuropa.es" site_id="37">Galicia TV</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="GOLPLAY.es" site_id="897">Gol TV</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Historia.es" site_id="148">Historia</channel>
-  <channel site="programacion-tv.elpais.com" lang="en" xmltv_id="i24NEWSEnglishWorld.il" site_id="792">i24 News</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="IberaliaTV.es" site_id="654">Iberalia</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="La1.es" site_id="3">La 1</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="La2.es" site_id="4">La 2</channel>
@@ -170,7 +169,6 @@
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="NickJr.es" site_id="687">Nick Junior</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Nova.es" site_id="509">Nova</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Odisea.es" site_id="135">Odisea</channel>
-  <channel site="programacion-tv.elpais.com" lang="ro" xmltv_id="PROTVInternational.ro" site_id="570">Pro TV Internacional</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="RealMadridTV.es" site_id="158">Real Madrid TV</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="RecordTVEuropa.pt" site_id="615">Record TV</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="SeriesporMovistarPlusPlus.es" site_id="843">Movistar Series</channel>
@@ -195,4 +193,6 @@
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="VePlusPanregional.ve" site_id="653">VE PLUS TV</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Viajar.es" site_id="188">Viajar</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="XTRM.es" site_id="68">XTRM</channel>
+  <channel site="programacion-tv.elpais.com" lang="fr" xmltv_id="France24Espanol.fr" site_id="608">France 24</channel>
+  <channel site="programacion-tv.elpais.com" lang="ro" xmltv_id="PROTVInternational.ro" site_id="570">Pro TV Internacional</channel>
 </channels>
