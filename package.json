@@ -19,6 +19,9 @@
   },
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "jest": {
     "setupFiles": [
       "<rootDir>/node_modules/jest-offline"
