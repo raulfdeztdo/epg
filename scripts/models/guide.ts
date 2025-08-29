@@ -23,7 +23,7 @@ export class Guide {
 
     toString() {
         const currDate = new DateTime(process.env.CURR_DATE || new Date().toISOString(), {
-            timezone: 'Europe/Madrid'
+            timezone: 'UTC'
         })
 
         return generateXMLTV({
