@@ -15,37 +15,63 @@ module.exports = {
             'YYYY-MM-DD'
         )}`
     },
-    async parser({ content }) {
+    async parser({ content, date }) {
         let programs = []
-        let items = parseItems(content)
-        if (!items.length) return programs
-
         const $ = cheerio.load(content)
         const programElements = $('div[id^="ele-"]').get()
 
-        for (let i = 0; i < items.length; i++) {
-            const el = items[i]
+        for (let i = 0; i < programElements.length; i++) {
+            const programDiv = $(programElements[i])
+            const programLink = programDiv.find('a').attr('href')
+            
+            // Extract title
+            const titleElement = programDiv.find('[class*="title"], h1, h2, h3, h4, h5, h6').first()
+            const title = titleElement.length ? titleElement.text().trim() : programDiv.find('a').text().trim()
+            
+            // Extract time
+            const timeElement = programDiv.find('.time').first()
+            const timeText = timeElement.length ? timeElement.text().trim() : '00:00'
+            
+            // Crear fechas en timezone local y convertir a UTC manteniendo la fecha correcta
+            const startTime = dayjs.tz(`${date.format('YYYY-MM-DD')} ${timeText}`, 'Europe/Madrid')
+            let endTime
+            
+            if (i < programElements.length - 1) {
+                const nextTimeText = $(programElements[i + 1]).find('.time').text().trim()
+                endTime = dayjs.tz(`${date.format('YYYY-MM-DD')} ${nextTimeText}`, 'Europe/Madrid')
+                
+                // Si el programa siguiente empieza antes que el actual, es del día siguiente
+                if (endTime.isBefore(startTime)) {
+                    endTime = endTime.add(1, 'day')
+                }
+            } else {
+                // Para el último programa del día, termina a medianoche del día siguiente
+                endTime = dayjs.tz(`${date.format('YYYY-MM-DD')}`, 'Europe/Madrid').add(1, 'day').startOf('day')
+            }
+            
+            // Convertir a UTC pero preservando la fecha local para evitar cambios de día
+            // en programas de madrugada
+            const startUTC = startTime.utc()
+            const endUTC = endTime.utc()
+            
+            // Get description if available
             let description = null
-
-            if (programElements[i]) {
-                const programDiv = $(programElements[i])
-                const programLink = programDiv.find('a').attr('href')
-
-                if (programLink) {
-                    const idMatch = programLink.match(/id=(\d+)/)
-                    if (idMatch && idMatch[1]) {
-                        description = await getProgramDescription(programLink).catch(() => null)
-                    }
+            if (programLink) {
+                const idMatch = programLink.match(/id=(\d+)/)
+                if (idMatch && idMatch[1]) {
+                    description = await getProgramDescription(programLink).catch(() => null)
                 }
             }
 
             programs.push({
-                title: el.item.name,
+                title: title || 'Programa sin título',
                 description: description,
-                start: dayjs(el.item.startDate),
-                stop: dayjs(el.item.endDate)
+                start: startUTC,
+                stop: endUTC
             })
         }
+
+
 
         return programs
     },
@@ -72,18 +98,7 @@ module.exports = {
     }
 }
 
-function parseItems(content) {
-    try {
-        const $ = cheerio.load(content)
-        let scheme = $('script:contains("@type": "ItemList")').html()
-        scheme = JSON.parse(scheme)
-        if (!scheme || !Array.isArray(scheme.itemListElement)) return []
-
-        return scheme.itemListElement
-    } catch {
-        return []
-    }
-}
+// parseItems function removed - now parsing directly from HTML elements
 
 async function getProgramDescription(programUrl) {
     try {
