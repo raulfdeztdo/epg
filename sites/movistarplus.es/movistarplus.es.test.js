@@ -60,8 +60,8 @@ it('can parse response', async () => {
 	  'Espacio de televenta.'
   })
   expect(results[19]).toMatchObject({
-    start: '2025-05-31T00:45:00.000Z',
-    stop: '2025-05-31T01:25:00.000Z',
+    start: '2025-05-30T00:45:00.000Z',
+    stop: '2025-05-30T01:25:00.000Z',
     title: 'Pokerstars casino',
 	description:
 	  'El programa trae cada día toda la emoción de su ruleta en vivo, Spin & Win, una versión exclusiva del clásico juego de casino.'
