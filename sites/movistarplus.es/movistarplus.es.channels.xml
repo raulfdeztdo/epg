@@ -167,9 +167,7 @@
   <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="usop11">M+ Deportes 5</channel>
   <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="vamosd">M+ Vamos</channel>
   <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="vh1">MTV 00s</channel>
-
   <channel site="programacion-tv.elpais.com" lang="en" xmltv_id="CNNInternational.us" site_id="203">CNN Internacional</channel>
-
   <channel site="programacion-tv.elpais.com" lang="en" xmltv_id="i24NEWSEnglishWorld.il" site_id="792">i24 News</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="18">La 1 Catalunya</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="32">Andalucía TV</channel>
@@ -291,7 +289,6 @@
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Clan.es" site_id="505">Clan</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CMMTV.es" site_id="296">Castilla - La Mancha TV</channel>
   <channel site="programacion-tv.elpais.com" lang="en" xmltv_id="CNBCEurope.uk" site_id="204">CNBC</channel>
-
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="ComediaporMovistarPlusPlus.es" site_id="848">Movistar Comedia</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="ComedyCentral.es" site_id="493">Comedy Central</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="COSMO.es" site_id="186">Cosmopolitan</channel>
@@ -313,8 +310,6 @@
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="EuronewsSpanish.fr" site_id="139">Euronews</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Eurosport1.fr" site_id="154">Eurosport</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Eurosport2.fr" site_id="491">Eurosport 2</channel>
-
-
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="FactoriadeFiccion.es" site_id="506">FDF Telecinco</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="FoxLife.es" site_id="660">Fox Life</channel>
   <channel site="programacion-tv.elpais.com" lang="fr" xmltv_id="France24.fr@Spanish" site_id="608">France 24</channel>
@@ -364,7 +359,6 @@
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="VePlus.ve@Panregional" site_id="653">VE PLUS TV</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Viajar.es" site_id="188">Viajar</channel>
   <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="XTRM.es" site_id="68">XTRM</channel>
-
   <channel site="programacion-tv.elpais.com" lang="ro" xmltv_id="PROTVInternational.ro" site_id="570">Pro TV Internacional</channel>
   <channel site="orangetv.orange.es" lang="es" xmltv_id="La1.es" site_id="1010">LA 1 HD</channel>
   <channel site="orangetv.orange.es" lang="es" xmltv_id="La2.es" site_id="1062">La 2 HD</channel>
@@ -525,7 +519,6 @@
   <channel site="orangetv.orange.es" lang="es" xmltv_id="Motorvision.de" site_id="11105">Motorvision</channel>
   <channel site="orangetv.orange.es" lang="es" xmltv_id="Esport3.es" site_id="2038">Esport3</channel>
   <channel site="orangetv.orange.es" lang="es" xmltv_id="BBCNews.uk@Europe" site_id="11021">BBC World HD</channel>
-
   <channel site="orangetv.orange.es" lang="es" xmltv_id="DW.de@Espanol" site_id="11024">Deutsche Welle</channel>
   <channel site="orangetv.orange.es" lang="es" xmltv_id="AlJazeera.qa@English" site_id="11025">Al Jazeera</channel>
   <channel site="orangetv.orange.es" lang="es" xmltv_id="PROTV.ba" site_id="11028">Pro TV</channel>
