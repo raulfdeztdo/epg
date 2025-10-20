@@ -19,11 +19,16 @@ module.exports = {
     for (let i = 0; i < items.length; i++) {
       const el = items[i]
       let description = null
+      let title = null
 
       if (programElements[i]) {
         const programDiv = $(programElements[i])
+
+        // Extraer el título desde el HTML
+        title = programDiv.find('li.title').text().trim()
+
         const programLink = programDiv.find('a').attr('href')
-        
+
         if (programLink) {
           const idMatch = programLink.match(/id=(\d+)/)
           if (idMatch && idMatch[1]) {
@@ -33,7 +38,7 @@ module.exports = {
       }
 
       programs.push({
-        title: el.item.name,
+        title: title || el.item.name || 'Sin título',
         description: description,
         start: dayjs(el.item.startDate),
         stop: dayjs(el.item.endDate)
