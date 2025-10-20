@@ -6,7 +6,13 @@ const FIELDS = new Dictionary({
 })
 
 export class IssueParser {
-  parse(issue: { number: number; body: string; labels: { name: string }[] }): Issue {
+  parse(issue: { number: number; body: string | null; labels: { name: string }[] }): Issue {
+    // Handle cases where issue.body is null or undefined
+    if (!issue.body) {
+      const labels = issue.labels.map(label => label.name)
+      return new Issue({ number: issue.number, labels, data: new Dictionary() })
+    }
+    
     const fields = issue.body.split('###')
 
     const data = new Dictionary()
