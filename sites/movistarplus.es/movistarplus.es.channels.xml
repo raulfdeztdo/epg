@@ -5,7 +5,6 @@
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="13tv">TRECE</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="24h">24 Horas</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="a3">Antena 3</channel>
-    <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="aljaze">Al Jazeera English</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="andatv">Andalucía TV</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="antv">Canal Sur Andalucía</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="apunt">À Punt</channel>
@@ -18,16 +17,11 @@
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="baby">Baby TV</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="bbc">BBC World</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="bbdra">BBC Drama</channel>
-    <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="bbfoo">BBC Food</channel>
-    <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="bbgea">BBC Top Gear</channel>
-    <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="bbhis">BBC History</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="bemad">BE MAD</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="bl">Bloomberg</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="boing">Boing</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="btv">Betevé</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="c4">Cuatro</channel>
-    <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="c33">SX3</channel>
-    <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="can33">33</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="canar">TV Canaria</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="cansur">Canal Sur</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="casman">Castilla la Mancha TV</channel>
@@ -42,7 +36,6 @@
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="chap3">M+ Liga de Campeones 4</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="chap4">M+ Liga de Campeones 5</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="chapio">M+ Liga de Campeones</channel>
-    <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="chile">TV Chile</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="cl13">Calle 13</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="clantv">Clan TVE</channel>
     <channel site="movistarplus.es" lang="es" xmltv_id="" site_id="classd">Classica</channel>
@@ -173,13 +166,10 @@
     <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="492">AMC Break</channel>
     <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="691">AMC Crime</channel>
     <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="SolMusica.es" site_id="171">Buen viaje</channel>
-    <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CMMTV.es" site_id="296">Castilla - La Mancha TV</channel>
     <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Dark.es" site_id="920">Dark</channel>
     <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Decasa.es" site_id="572">Decasa</channel>
     <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CanalPanda.es" site_id="698">En familia</channel>
     <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Historia.es" site_id="148">Historia</channel>
-    <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="CaracolInternacional.co" site_id="566">Caracol TV</channel>
-    <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="603">Libertad Digital TV</channel>
     <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="" site_id="705">MTV 80s</channel>
     <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="MTVHitsEurope.uk" site_id="161">MTV Hits</channel>
     <channel site="programacion-tv.elpais.com" lang="es" xmltv_id="Odisea.es" site_id="135">Odisea</channel>
