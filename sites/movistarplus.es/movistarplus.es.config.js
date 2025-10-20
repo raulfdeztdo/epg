@@ -8,7 +8,7 @@ module.exports = {
   url({ channel, date }) {
     return `https://www.movistarplus.es/programacion-tv/${channel.site_id}/${date.format('YYYY-MM-DD')}`
   },
-  async parser({ content }) {
+  async parser({ content, date }) {
     let programs = []
     let items = parseItems(content)
     if (!items.length) return programs
@@ -16,33 +16,65 @@ module.exports = {
     const $ = cheerio.load(content)
     const programElements = $('div[id^="ele-"]').get()
 
-    for (let i = 0; i < items.length; i++) {
-      const el = items[i]
+    for (let i = 0; i < programElements.length; i++) {
+      const programDiv = $(programElements[i])
       let description = null
       let title = null
 
-      if (programElements[i]) {
-        const programDiv = $(programElements[i])
+      // Extraer el título desde el HTML
+      title = programDiv.find('li.title').text().trim()
 
-        // Extraer el título desde el HTML
-        title = programDiv.find('li.title').text().trim()
+      // Extraer la hora de inicio desde el HTML
+      const timeElement = programDiv.find('li.time').text().trim()
+      let startTime = null
+      let endTime = null
 
-        const programLink = programDiv.find('a').attr('href')
-
-        if (programLink) {
-          const idMatch = programLink.match(/id=(\d+)/)
-          if (idMatch && idMatch[1]) {
-            description = await getProgramDescription(programLink).catch(() => null)
+      if (timeElement && timeElement.match(/^\d{2}:\d{2}$/)) {
+        const [hours, minutes] = timeElement.split(':')
+        
+        // Crear la fecha y hora de inicio
+        startTime = dayjs(date).hour(parseInt(hours)).minute(parseInt(minutes)).second(0)
+        
+        // Calcular la hora de fin basándose en el siguiente programa
+        if (i < programElements.length - 1) {
+          const nextProgramDiv = $(programElements[i + 1])
+          const nextTimeElement = nextProgramDiv.find('li.time').text().trim()
+          
+          if (nextTimeElement && nextTimeElement.match(/^\d{2}:\d{2}$/)) {
+            const [nextHours, nextMinutes] = nextTimeElement.split(':')
+            endTime = dayjs(date).hour(parseInt(nextHours)).minute(parseInt(nextMinutes)).second(0)
+            
+            // Si el siguiente programa es al día siguiente (hora menor)
+            if (endTime.isBefore(startTime)) {
+              endTime = endTime.add(1, 'day')
+            }
           }
+        }
+        
+        // Si no hay siguiente programa o no se pudo calcular, usar duración por defecto
+        if (!endTime) {
+          endTime = startTime.add(2, 'hours') // Duración por defecto de 2 horas
         }
       }
 
-      programs.push({
-        title: title || el.item.name || 'Sin título',
-        description: description,
-        start: dayjs(el.item.startDate),
-        stop: dayjs(el.item.endDate)
-      })
+      // Obtener descripción si hay enlace
+      const programLink = programDiv.find('a').attr('href')
+      if (programLink) {
+        const idMatch = programLink.match(/id=(\d+)/)
+        if (idMatch && idMatch[1]) {
+          description = await getProgramDescription(programLink).catch(() => null)
+        }
+      }
+
+      // Solo añadir el programa si tenemos hora de inicio válida
+      if (startTime && endTime) {
+        programs.push({
+          title: title || 'Sin título',
+          description: description,
+          start: startTime,
+          stop: endTime
+        })
+      }
     }
 
     return programs
