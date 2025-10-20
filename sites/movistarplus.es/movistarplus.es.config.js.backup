@@ -73,48 +73,50 @@ module.exports = {
     const descriptions = await getDescriptionsInBatches(programsData.map(p => p.programUrl).filter(Boolean))
     
     // Combinar datos básicos con descripciones
-    programsData.forEach((program) => {
+    programsData.forEach((program, index) => {
       programs.push({
         title: program.title,
+        description: descriptions[program.programUrl] || null,
         start: program.start,
-        stop: program.stop,
-        description: descriptions[program.programUrl] || ''
+        stop: program.stop
       })
     })
 
     return programs
   },
   async channels() {
-    const axios = require('axios')
-    const cheerio = require('cheerio')
-    
-    const data = await axios.get('https://www.movistarplus.es/programacion-tv/', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    const html = await axios
+      .get('https://www.movistarplus.es/programacion-tv')
+      .then(r => r.data)
+      .catch(console.log)
+
+    const $ = cheerio.load(html)
+    let scheme = $('script:contains(ItemList)').html()
+    scheme = JSON.parse(scheme)
+
+    return scheme.itemListElement.map(el => {
+      const urlParts = el.item.url.split('/')
+      const site_id = urlParts.pop().toLowerCase()
+
+      return {
+        lang: 'es',
+        name: el.item.name,
+        site_id
       }
     })
-    
-    const $ = cheerio.load(data.data)
-    const channels = []
-    
-    $('a[href*="/programacion-tv/"]').each((i, el) => {
-      const href = $(el).attr('href')
-      if (href && href.includes('/programacion-tv/') && !href.includes('/programacion-tv/fecha/')) {
-        const match = href.match(/\/programacion-tv\/([^/]+)/)
-        if (match) {
-          const channelId = match[1]
-          const name = $(el).text().trim()
-          if (name && channelId !== 'fecha') {
-            channels.push({
-              site_id: channelId,
-              name: name
-            })
-          }
-        }
-      }
-    })
-    
-    return channels
+  }
+}
+
+function parseItems(content) {
+  try {
+    const $ = cheerio.load(content)
+    let scheme = $('script:contains("@type": "ItemList")').html()
+    scheme = JSON.parse(scheme)
+    if (!scheme || !Array.isArray(scheme.itemListElement)) return []
+
+    return scheme.itemListElement
+  } catch {
+    return []
   }
 }
 
@@ -122,30 +124,24 @@ async function getProgramDescription(programUrl) {
   try {
     const response = await axios.get(programUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Referer': 'https://www.movistarplus.es/programacion-tv/'
-      },
-      timeout: 10000
+      }
     })
-    
+
     const $ = cheerio.load(response.data)
-    const description = $('.sinopsis p').text().trim() || 
-                      $('.description').text().trim() || 
-                      $('.synopsis').text().trim() || 
-                      $('meta[name="description"]').attr('content') || ''
-    
+    const description = $('.show-content .text p').first().text().trim() || null
+
     return description
   } catch (error) {
     console.error(`Error fetching description from ${programUrl}:`, error.message)
-    return ''
+    return null
   }
 }
 
 // Función optimizada para obtener descripciones en lotes
 async function getDescriptionsInBatches(urls) {
   const descriptions = {}
-  const batchSize = 5 // Procesar 5 URLs en paralelo
-  const delay = 100 // Pequeño retraso entre lotes para no sobrecargar el servidor
+  const batchSize = 5 // Procesar 5 URLs en paralelo para no sobrecargar el servidor
   
   for (let i = 0; i < urls.length; i += batchSize) {
     const batch = urls.slice(i, i + batchSize)
@@ -155,15 +151,19 @@ async function getDescriptionsInBatches(urls) {
       return { url, description }
     })
     
-    const results = await Promise.all(promises)
+    try {
+      const results = await Promise.all(promises)
+      results.forEach(({ url, description }) => {
+        descriptions[url] = description
+      })
+    } catch (error) {
+      console.error('Error processing batch:', error.message)
+      // En caso de error, continuar con el siguiente lote
+    }
     
-    results.forEach(({ url, description }) => {
-      descriptions[url] = description
-    })
-    
-    // Pequeño retraso entre lotes
+    // Pequeña pausa entre lotes para ser respetuosos con el servidor
     if (i + batchSize < urls.length) {
-      await new Promise(resolve => setTimeout(resolve, delay))
+      await new Promise(resolve => setTimeout(resolve, 100))
     }
   }
   
