@@ -1,6 +1,11 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
 const dayjs = require('dayjs')
+const timezone = require('dayjs/plugin/timezone')
+const utc = require('dayjs/plugin/utc')
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 module.exports = {
   site: 'movistarplus.es',
@@ -32,10 +37,9 @@ module.exports = {
       const timeElement = programDiv.find('li.time').text().trim()
       
       if (timeElement && timeElement.match(/^\d{2}:\d{2}$/)) {
-        const [hours, minutes] = timeElement.split(':')
-        
-        // Crear la fecha y hora de inicio
-        const startTime = dayjs(date).hour(parseInt(hours)).minute(parseInt(minutes)).second(0)
+        // Crear la fecha y hora de inicio en zona horaria de Madrid, luego convertir a UTC
+        // para que el framework EPG la interprete correctamente
+        const startTime = dayjs.tz(date.format('YYYY-MM-DD') + ' ' + timeElement, 'YYYY-MM-DD HH:mm', 'Europe/Madrid').utc()
         
         // Calcular la hora de fin basándose en el siguiente programa
         let endTime = null
@@ -45,8 +49,7 @@ module.exports = {
           const nextTimeElement = nextProgramDiv.find('li.time').text().trim()
           
           if (nextTimeElement && nextTimeElement.match(/^\d{2}:\d{2}$/)) {
-            const [nextHours, nextMinutes] = nextTimeElement.split(':')
-            endTime = dayjs(date).hour(parseInt(nextHours)).minute(parseInt(nextMinutes)).second(0)
+            endTime = dayjs.tz(date.format('YYYY-MM-DD') + ' ' + nextTimeElement, 'YYYY-MM-DD HH:mm', 'Europe/Madrid').utc()
             
             // Si el siguiente programa es al día siguiente (hora menor)
             if (endTime.isBefore(startTime)) {
