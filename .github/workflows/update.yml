@@ -1,5 +1,6 @@
 name: EPG Grabber
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 3 * * *"  # Ejecuta todos los días a las 5:00 AM (Europa/Madrid)
 jobs:
