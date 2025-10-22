@@ -1,8 +1,8 @@
-name: update
+name: EPG Grabber 2.0
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 4 * * *'
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -25,6 +25,8 @@ jobs:
           npm run channels:lint
       - name: update sites.md
         run: npm run sites:update
+      - name: update EPG
+        run: npm run grab --- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --maxConnections=3 --days=2 --timeout=10000
       - run: git status
       - name: commit changes to sites.md
         if: ${{ !env.ACT && github.ref == 'refs/heads/master' }}
