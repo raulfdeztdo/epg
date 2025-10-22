@@ -1,55 +1,31 @@
-name: EPG Grabber 2.0
+name: EPG Grabber
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '0 4 * * *'
+    - cron: "0 3 * * *"  # Ejecuta todos los días a las 5:00 AM (Europa/Madrid)
 jobs:
-  main:
+  grab:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_TOKEN }}
-      - name: setup git
-        run: |
-          git config user.name "iptv-bot[bot]"
-          git config user.email "84861620+iptv-bot[bot]@users.noreply.github.com"
-      - uses: actions/setup-node@v4
+          token: ${{ secrets.GH_TOKEN }}  # Usa el PAT para hacer checkout
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 22
-          cache: 'npm'
-      - name: install dependencies
+          node-version: 20  # Usa la versión de Node.js que necesites
+
+      - name: Install dependencies
         run: npm install
-      - name: check *.channels.xml
-        run: |
-          npm run channels:lint
-      - name: update sites.md
-        run: npm run sites:update
-      - name: update EPG
+
+      - name: Run grab for Movistar+
         run: npm run grab --- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --maxConnections=3 --days=2 --timeout=10000
-      - run: git status
-      - name: commit changes to sites.md
-        if: ${{ !env.ACT && github.ref == 'refs/heads/master' }}
+
+      - name: Commit and push changes
         run: |
-          SITE=SITES.md
-          CHANGED=$(git diff ${SITE})
-          if [ -n "${CHANGED}" ]; then
-            git add ${SITE}
-            git commit -m "[Bot] Update ${SITE}" -m "Committed by [iptv-bot](https://github.com/apps/iptv-bot) via [update](https://github.com/iptv-org/epg/actions/runs/${{ github.run_id }}) workflow." --no-verify
-            git push
-          fi
-      - name: generate .api/guides.json
-        run: npm run api:generate
-      - run: git status
-      - name: move .api/guides.json to iptv-org/api
-        uses: JamesIves/github-pages-deploy-action@4.1.1
-        if: ${{ !env.ACT && github.ref == 'refs/heads/master' }}
-        with:
-          repository-name: iptv-org/api
-          branch: gh-pages
-          folder: .api
-          token: ${{ secrets.GH_TOKEN }}
-          git-config-name: iptv-bot[bot]
-          git-config-email: 84861620+iptv-bot[bot]@users.noreply.github.com
-          commit-message: '[Bot] Deploy to iptv-org/api'
-          clean: false
+          git config --global user.name "iptv-bot[bot]"
+          git config --global user.email "41898282+iptv-bot[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "[BOT] Update EPG guide" --no-verify
+          git push https://${{ secrets.GH_TOKEN }}@github.com/raulfdeztdo/epg.git
