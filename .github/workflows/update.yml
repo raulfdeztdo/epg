@@ -30,7 +30,7 @@ jobs:
         run: |
           git config user.name "epg-bot[bot]"
           git config user.email "41898282+epg-bot[bot]@users.noreply.github.com"
-          git add guide.xml
+          git add -f guide.xml
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "[BOT] Update EPG guide"
           git push
