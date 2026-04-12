@@ -1,6 +1,6 @@
-# EPG - Guia Electronica de Programacion (TV Espana)
+# EPG - Guia Electronica de Programacion (TV España)
 
-Fork simplificado de [iptv-org/epg](https://github.com/iptv-org/epg) para descargar la guia de programacion (EPG) de canales de television en Espana.
+Fork simplificado de [iptv-org/epg](https://github.com/iptv-org/epg) para descargar la guia de programacion (EPG) de canales de television en España.
 
 ## Fuentes soportadas
 
@@ -142,7 +142,7 @@ https://raw.githubusercontent.com/raulfdeztdo/epg/main/guide.xml
 
 ## Origen
 
-Fork de [iptv-org/epg](https://github.com/iptv-org/epg), simplificado para mantener unicamente las fuentes de TV en Espana.
+Fork de [iptv-org/epg](https://github.com/iptv-org/epg), simplificado para mantener unicamente las fuentes de TV en España.
 
 ## Licencia
 
