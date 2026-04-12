@@ -13,6 +13,6 @@
     "allowJs": true,
     "outDir": "./dist"
   },
-  "include": ["scripts/**/*", "src/**/*"],
+  "include": ["scripts/**/*"],
   "exclude": ["node_modules", "dist"]
 }

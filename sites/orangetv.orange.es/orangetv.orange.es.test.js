@@ -81,5 +81,5 @@ it('can handle empty guide', async () => {
     channel,
     content: '{}'
   })
-  expect(result).toMatchObject({})
+  expect(result).toMatchObject([])
 })

@@ -1,238 +1,149 @@
-# EPG [![update](https://github.com/iptv-org/epg/actions/workflows/update.yml/badge.svg)](https://github.com/iptv-org/epg/actions/workflows/update.yml)
+# EPG - Guia Electronica de Programacion (TV Espana)
 
-Tools for downloading the EPG (Electronic Program Guide) for thousands of TV channels from hundreds of sources.
+Fork simplificado de [iptv-org/epg](https://github.com/iptv-org/epg) para descargar la guia de programacion (EPG) de canales de television en Espana.
 
-## Table of contents
+## Fuentes soportadas
 
-- ✨ [Installation](#installation)
-- 🚀 [Usage](#usage)
-- 💫 [Update](#update)
-- 🐋 [Docker](#docker)
-- 📺 [Playlists](#playlists)
-- 🗄 [Database](#database)
-- 👨‍💻 [API](#api)
-- 📚 [Resources](#resources)
-- 💬 [Discussions](#discussions)
-- 🛠 [Contribution](#contribution)
-- 📄 [License](#license)
+| Fuente | Canales | Metodo |
+| --- | --- | --- |
+| `movistarplus.es` | 160 | Scraping HTML |
+| `programacion-tv.elpais.com` | 17 | API JSON |
+| `orangetv.orange.es` | 6 | API JSON |
 
-## Installation
+> Los canales estan definidos en `sites/movistarplus.es/movistarplus.es.channels.xml`. Este fichero incluye canales de las 3 fuentes (cada canal tiene el atributo `site` indicando de donde se obtienen sus datos).
 
-First, you need to install [Node.js](https://nodejs.org/en) on your computer. You will also need to install [Git](https://git-scm.com/downloads) to follow these instructions.
+## Como funciona
 
-After that open the [Console](https://en.wikipedia.org/wiki/Windows_Console) (or [Terminal](<https://en.wikipedia.org/wiki/Terminal_(macOS)>) if you have macOS) and type the following command:
+1. Un **GitHub Action** (`update.yml`) se ejecuta automaticamente cada dia a las 05:00 (hora de Madrid)
+2. Lee el fichero de canales y, segun el atributo `site` de cada canal, utiliza el parser correspondiente para obtener la programacion
+3. Genera un fichero `guide.xml` en formato XMLTV con la programacion de los proximos 2 dias
+4. Hace commit y push automaticamente del fichero actualizado
 
-```sh
-git clone --depth 1 -b master https://github.com/iptv-org/epg.git
+## Estructura del proyecto
+
+```
+epg/
+├── .agents/skills/             # Skills para agentes IA (web-scraping, xmltv, jest...)
+├── .github/workflows/
+│   └── update.yml              # Workflow programado (cron diario)
+├── scripts/
+│   ├── commands/
+│   │   ├── epg/grab.ts         # Comando principal: descarga la EPG
+│   │   ├── channels/lint.mts   # Validacion de sintaxis XML
+│   │   ├── channels/validate.ts # Validacion de datos de canales
+│   │   └── api/load.ts         # Descarga base de datos de canales
+│   ├── core/                   # Logica del grabber (queue, jobs, parsers...)
+│   ├── models/                 # Modelos de datos (Channel, Guide, Feed...)
+│   ├── types/                  # Definiciones de tipos TypeScript
+│   └── constants.ts            # Rutas y constantes globales
+├── sites/
+│   ├── movistarplus.es/        # Parser + canales de Movistar+
+│   ├── orangetv.orange.es/     # Parser + canales de Orange TV
+│   └── programacion-tv.elpais.com/ # Parser + canales de El Pais
+├── tests/                      # Tests (Jest)
+├── guide.xml                   # Salida generada (XMLTV) - en .gitignore
+├── package.json
+└── tsconfig.json
 ```
 
-Then navigate to the downloaded `epg` folder:
+### Anatomia de un site
+
+Cada directorio dentro de `sites/` contiene:
+
+```
+sites/ejemplo.com/
+├── ejemplo.com.config.js       # Configuracion del parser (URL, parser HTML/JSON, timezone)
+├── ejemplo.com.channels.xml    # Lista de canales en formato XML
+├── ejemplo.com.test.js         # Tests del parser
+├── __data__/                   # Fixtures para tests
+└── readme.md                   # Documentacion del site
+```
+
+## Instalacion
+
+Requisitos: [Node.js](https://nodejs.org/) (v22+) y [Git](https://git-scm.com/).
 
 ```sh
+git clone https://github.com/raulfdeztdo/epg.git
 cd epg
-```
-
-And install all the dependencies:
-
-```sh
 npm install
 ```
 
-## Usage
+## Uso
 
-To start the download of the guide, select one of the supported sites from [SITES.md](SITES.md) file and paste its name into the command below:
+### Descargar la guia completa
 
-```sh
-npm run grab --- --site=example.com
-```
-
-Then run it and wait for the guide to finish downloading. When finished, a new `guide.xml` file will appear in the current directory.
-
-You can also customize the behavior of the script using this options:
+Ejecuta el grab usando el fichero de canales de Movistar (que incluye canales de las 3 fuentes):
 
 ```sh
-Usage: npm run grab --- [options]
-
-Options:
-  -s, --site <name>             Name of the site to parse
-  -c, --channels <path>         Path to *.channels.xml file (required if the "--site" attribute is
-                                not specified)
-  -o, --output <path>           Path to output file (default: "guide.xml")
-  -l, --lang <codes>            Allows you to restrict downloading to channels in specified languages only (example: "en,id")
-  -t, --timeout <milliseconds>  Timeout for each request in milliseconds (default: 0)
-  -d, --delay <milliseconds>    Delay between request in milliseconds (default: 0)
-  -x, --proxy <url>             Use the specified proxy (example: "socks5://username:password@127.0.0.1:1234")
-  --days <days>                 Number of days for which the program will be loaded (defaults to the value from the site config)
-  --maxConnections <number>     Number of concurrent requests (default: 1)
-  --gzip                        Specifies whether or not to create a compressed version of the guide (default: false)
-  --curl                        Display each request as CURL (default: false)
+npm run grab -- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --maxConnections=3 --days=2 --timeout=10000
 ```
 
-### Parallel downloading
+Esto genera el fichero `guide.xml` en el directorio raiz.
 
-By default, the guide for each channel is downloaded one by one, but you can change this behavior by increasing the number of simultaneous requests using the `--maxConnections` attribute:
+### Descargar solo un site concreto
 
 ```sh
-npm run grab --- --site=example.com --maxConnections=10
+npm run grab -- --site=orangetv.orange.es
 ```
 
-But be aware that under heavy load, some sites may start return an error or completely block your access.
+### Opciones disponibles
 
-### Use custom channel list
-
-Create an XML file and copy the descriptions of all the channels you need from the [/sites](sites) into it:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<channels>
-  <channel site="arirang.com" lang="en" xmltv_id="ArirangTV.kr" site_id="CH_K">Arirang TV</channel>
-  ...
-</channels>
+```
+Opciones:
+  -s, --site <nombre>             Nombre del site a usar
+  -c, --channels <ruta>           Ruta al fichero .channels.xml
+  -o, --output <ruta>             Fichero de salida (default: "guide.xml")
+  -l, --lang <codigos>            Filtrar por idioma (ej: "es,en")
+  -t, --timeout <ms>              Timeout por peticion en ms (default: 0)
+  -d, --delay <ms>                Retardo entre peticiones en ms (default: 0)
+  --days <dias>                   Numero de dias a descargar
+  --maxConnections <numero>       Peticiones simultaneas (default: 1)
+  --gzip                          Generar version comprimida .xml.gz
 ```
 
-And then specify the path to that file via the `--channels` attribute:
+## GitHub Action
+
+El workflow `.github/workflows/update.yml` se ejecuta:
+
+- **Automaticamente** cada dia a las 03:00 UTC (05:00 hora de Madrid)
+- **Manualmente** desde la pestana Actions del repositorio (workflow_dispatch)
+
+Necesita el secret `GH_TOKEN` (Personal Access Token) configurado en el repositorio para poder hacer push.
+
+## Tests
 
 ```sh
-npm run grab --- --channels=path/to/custom.channels.xml
+npm test
 ```
 
-### Run on schedule
+Ejecuta los tests de los parsers de cada site y los tests de los comandos.
 
-If you want to download guides on a schedule, you can use [cron](https://en.wikipedia.org/wiki/Cron) or any other task scheduler. Currently, we use a tool called `chronos` for this purpose.
-
-To start it, you only need to specify the necessary `grab` command and [cron expression](https://crontab.guru/):
+## Lint
 
 ```sh
-npx chronos --execute="npm run grab --- --site=example.com" --pattern="0 0,12 * * *" --log
+npm run lint
 ```
 
-For more info go to [chronos](https://github.com/freearhey/chronos) documentation.
+## Uso del guide.xml
 
-### Access the guide by URL
+El fichero `guide.xml` generado esta en formato [XMLTV](https://wiki.xmltv.org/index.php/XMLTVFormat) y es compatible con:
 
-You can make the guide available via URL by running your own server. The easiest way to do this is to run this command:
+- **Kodi** (PVR IPTV Simple Client)
+- **TiviMate**
+- **Plex** (con plugin XMLTV)
+- Cualquier reproductor IPTV que soporte guias EPG en formato XMLTV
 
-```sh
-npx serve
-```
-
-After that, the guide will be available at the link:
-
-```
-http://localhost:3000/guide.xml
-```
-
-In addition it will be available to other devices on the same local network at the address:
+La URL directa al fichero raw desde GitHub:
 
 ```
-http://<your_local_ip_address>:3000/guide.xml
+https://raw.githubusercontent.com/raulfdeztdo/epg/main/guide.xml
 ```
 
-For more info go to [serve](https://github.com/vercel/serve) documentation.
+## Origen
 
-## Update
+Fork de [iptv-org/epg](https://github.com/iptv-org/epg), simplificado para mantener unicamente las fuentes de TV en Espana.
 
-If you have downloaded the repository code according to the instructions above, then to update it will be enough to run the command:
+## Licencia
 
-```sh
-git pull
-```
-
-And then update all the dependencies:
-
-```sh
-npm install
-```
-
-## Docker
-
-### Pull an image
-
-```sh
-docker pull ghcr.io/iptv-org/epg:master
-```
-
-### Create and run container
-
-```sh
-docker run -p 3000:3000 -v /path/to/channels.xml:/epg/channels.xml ghcr.io/iptv-org/epg:master
-```
-
-By default, the guide will be downloaded every day at 00:00 UTC and saved to the `/epg/public/guide.xml` file inside the container.
-
-From the outside, it will be available at this link:
-
-```
-http://localhost:3000/guide.xml
-```
-
-or
-
-```
-http://<your_local_ip_address>:3000/guide.xml
-```
-
-### Environment Variables
-
-To fine-tune the execution, you can pass environment variables to the container as follows:
-
-```sh
-docker run \
--p 5000:3000 \
--v /path/to/channels.xml:/epg/channels.xml \
--e CRON_SCHEDULE="0 0,12 * * *" \
--e MAX_CONNECTIONS=10 \
--e GZIP=true \
--e CURL=true \
--e PROXY="socks5://127.0.0.1:1234" \
--e DAYS=14 \
--e TIMEOUT=5 \
--e DELAY=2 \
-iptv-org/epg
-```
-
-| Variable        | Description                                                                                                        |
-| --------------- | ------------------------------------------------------------------------------------------------------------------ |
-| CRON_SCHEDULE   | A [cron expression](https://crontab.guru/) describing the schedule of the guide loadings (default: "0 0 \* \* \*") |
-| MAX_CONNECTIONS | Limit on the number of concurrent requests (default: 1)                                                            |
-| GZIP            | Boolean value indicating whether to create a compressed version of the guide (default: false)                      |
-| CURL            | Display each request as CURL (default: false)                                                                      |
-| PROXY           | Use the specified proxy                                                                                            |
-| DAYS            | Number of days for which the guide will be loaded (defaults to the value from the site config)                     |
-| TIMEOUT         | Timeout for each request in milliseconds (default: 0)                                                              |
-| DELAY           | Delay between request in milliseconds (default: 0)                                                                 |
-| RUN_AT_STARTUP  | Run grab on container startup (default: true)                                                                      |
-
-## Database
-
-All channel data is taken from the [iptv-org/database](https://github.com/iptv-org/database) repository. If you find any errors please open a new [issue](https://github.com/iptv-org/database/issues) there.
-
-## API
-
-The API documentation can be found in the [iptv-org/api](https://github.com/iptv-org/api) repository.
-
-## Resources
-
-Links to other useful IPTV-related resources can be found in the [iptv-org/awesome-iptv](https://github.com/iptv-org/awesome-iptv) repository.
-
-## Discussions
-
-If you have a question or an idea, you can post it in the [Discussions](https://github.com/orgs/iptv-org/discussions) tab.
-
-## Contribution
-
-Please make sure to read the [Contributing Guide](https://github.com/iptv-org/epg/blob/master/CONTRIBUTING.md) before sending [issue](https://github.com/iptv-org/epg/issues) or a [pull request](https://github.com/iptv-org/epg/pulls).
-
-And thank you to everyone who has already contributed!
-
-### Backers
-
-<a href="https://opencollective.com/iptv-org"><img src="https://opencollective.com/iptv-org/backers.svg?width=890" /></a>
-
-### Contributors
-
-<a href="https://github.com/iptv-org/epg/graphs/contributors"><img src="https://opencollective.com/iptv-org/contributors.svg?width=890" /></a>
-
-## License
-
-[![CC0](http://mirrors.creativecommons.org/presskit/buttons/88x31/svg/cc-zero.svg)](LICENSE)
+[CC0](LICENSE)

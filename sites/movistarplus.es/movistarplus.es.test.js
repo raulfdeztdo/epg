@@ -56,8 +56,7 @@ it('can parse response', async () => {
     start: '2025-05-30T03:15:00.000Z',
     stop: '2025-05-30T04:25:00.000Z',
     title: 'Venta Prime',
-	description:
-	  'Espacio de televenta.'
+	description:'Espacio de televenta.'
   })
   expect(results[19]).toMatchObject({
     start: '2025-05-31T00:45:00.000Z',

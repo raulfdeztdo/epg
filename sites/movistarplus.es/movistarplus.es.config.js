@@ -15,6 +15,7 @@ module.exports = {
   },
   async parser({ content, date }) {
     let programs = []
+    if (!content) return programs
     const $ = cheerio.load(content)
     
     // Obtener todos los elementos de programas
@@ -24,6 +25,8 @@ module.exports = {
 
     // Extraer información básica y URLs de todos los programas
     const programsData = []
+    let dayOffset = 0
+    let prevHour = -1
     programElements.each((i, element) => {
       const programDiv = $(element)
       
@@ -37,9 +40,16 @@ module.exports = {
       const timeElement = programDiv.find('li.time').text().trim()
       
       if (timeElement && timeElement.match(/^\d{2}:\d{2}$/)) {
+        const currentHour = parseInt(timeElement.split(':')[0], 10)
+
+        // Detectar cruce de medianoche: si la hora actual es menor que la anterior
+        if (prevHour >= 0 && currentHour < prevHour && prevHour >= 12) {
+          dayOffset = 1
+        }
+        prevHour = currentHour
+
         // Crear la fecha y hora de inicio en zona horaria de Madrid, luego convertir a UTC
-        // para que el framework EPG la interprete correctamente
-        const startTime = dayjs.tz(date.format('YYYY-MM-DD') + ' ' + timeElement, 'YYYY-MM-DD HH:mm', 'Europe/Madrid').utc()
+        const startTime = dayjs.tz(date.format('YYYY-MM-DD') + ' ' + timeElement, 'YYYY-MM-DD HH:mm', 'Europe/Madrid').add(dayOffset, 'day').utc()
         
         // Calcular la hora de fin basándose en el siguiente programa
         let endTime = null
@@ -49,18 +59,15 @@ module.exports = {
           const nextTimeElement = nextProgramDiv.find('li.time').text().trim()
           
           if (nextTimeElement && nextTimeElement.match(/^\d{2}:\d{2}$/)) {
-            endTime = dayjs.tz(date.format('YYYY-MM-DD') + ' ' + nextTimeElement, 'YYYY-MM-DD HH:mm', 'Europe/Madrid').utc()
-            
-            // Si el siguiente programa es al día siguiente (hora menor)
-            if (endTime.isBefore(startTime)) {
-              endTime = endTime.add(1, 'day')
-            }
+            const nextHour = parseInt(nextTimeElement.split(':')[0], 10)
+            const nextDayOffset = (currentHour >= 12 && nextHour < currentHour) ? dayOffset + 1 : dayOffset
+            endTime = dayjs.tz(date.format('YYYY-MM-DD') + ' ' + nextTimeElement, 'YYYY-MM-DD HH:mm', 'Europe/Madrid').add(nextDayOffset, 'day').utc()
           }
         }
         
         // Si no hay siguiente programa o no se pudo calcular, usar duración por defecto
         if (!endTime) {
-          endTime = startTime.add(2, 'hours') // Duración por defecto de 2 horas
+          endTime = startTime.add(2, 'hours')
         }
 
         programsData.push({
@@ -132,9 +139,8 @@ async function getProgramDescription(programUrl) {
     })
     
     const $ = cheerio.load(response.data)
-    const description = $('.sinopsis p').text().trim() || 
-                      $('.description').text().trim() || 
-                      $('.synopsis').text().trim() || 
+    const description = $('.show-content .text p').text().trim() ||
+                      $('meta[property="og:description"]').attr('content') ||
                       $('meta[name="description"]').attr('content') || ''
     
     return description

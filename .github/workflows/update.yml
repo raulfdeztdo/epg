@@ -1,32 +1,36 @@
 name: EPG Grabber
+
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 3 * * *"  # Ejecuta todos los días a las 5:00 AM (Europa/Madrid)
+    - cron: "0 3 * * *" # Todos los dias a las 05:00 (Europa/Madrid)
+
 jobs:
   grab:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GH_TOKEN }}  # Usa el PAT para hacer checkout
+          token: ${{ secrets.GH_TOKEN }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20  # Usa la versión de Node.js que necesites
+          node-version: 22
+          cache: "npm"
 
       - name: Install dependencies
         run: npm install
 
-      - name: Run grab for Movistar+
-        run: npm run grab --- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --maxConnections=3 --days=2 --timeout=10000
+      - name: Grab EPG data
+        run: npm run grab -- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --maxConnections=3 --days=2 --timeout=10000
 
-      - name: Commit and push changes
+      - name: Commit and push
         run: |
-          git config --global user.name "iptv-bot[bot]"
-          git config --global user.email "41898282+iptv-bot[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "[BOT] Update EPG guide" --no-verify
-          git push https://${{ secrets.GH_TOKEN }}@github.com/raulfdeztdo/epg.git
+          git config user.name "epg-bot[bot]"
+          git config user.email "41898282+epg-bot[bot]@users.noreply.github.com"
+          git add guide.xml
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "[BOT] Update EPG guide"
+          git push

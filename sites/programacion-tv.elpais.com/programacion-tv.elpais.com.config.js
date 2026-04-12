@@ -21,7 +21,7 @@ module.exports = {
     const programs = []
     const items = parseItems(content, channel)
     if (!items.length) return programs
-    const programsData = await loadProgramsData(channel)
+    const programsData = await loadProgramsData(channel) || []
     items.forEach(item => {
       const start = parseStart(item)
       const stop = parseStop(item)
@@ -54,6 +54,8 @@ module.exports = {
       .then(r => r.data)
       .catch(console.log)
 
+    if (!data) return []
+
     return Object.values(data).map(item => ({
       lang: 'es',
       site_id: item.id,
@@ -71,6 +73,7 @@ function parseList(str) {
 }
 
 function parseImage(details) {
+  if (!details.image) return null
   const url = new URL(details.image, 'https://programacion-tv.elpais.com/')
 
   return url.href
