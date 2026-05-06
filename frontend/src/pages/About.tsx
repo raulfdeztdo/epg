@@ -1,5 +1,8 @@
-import { Github, Rss, Clock, Server, Monitor, Tv, Code } from 'lucide-react'
+import { useState } from 'react'
+import { Github, Rss, Clock, Server, Monitor, Tv, Code, Copy, ExternalLink, Check } from 'lucide-react'
 import Footer from '../components/Footer'
+
+const GUIDE_URL = 'https://epg-spain.netlify.app/guide.xml'
 
 const PLAYERS = [
   {
@@ -25,6 +28,18 @@ const PLAYERS = [
 ]
 
 export default function About() {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(GUIDE_URL)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Fallback for older browsers
+    }
+  }
+
   return (
     <div className="p-4 lg:p-6 space-y-5 lg:space-y-8 max-w-4xl mx-auto">
       <div>
@@ -131,11 +146,32 @@ export default function About() {
             <p className="text-xs lg:text-sm text-slate-300 mb-3">
               Añade esta URL como fuente EPG en tu reproductor IPTV:
             </p>
-            <div className="bg-slate-950 border border-slate-800 rounded-lg p-3">
-              <code className="text-[11px] lg:text-xs text-blue-400 break-all">
-                https://epg-spain.netlify.app/guide.xml
+            <div className="bg-slate-950 border border-slate-800 rounded-lg p-3 flex items-center gap-2">
+              <code className="text-[11px] lg:text-xs text-blue-400 break-all flex-1">
+                {GUIDE_URL}
               </code>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={handleCopy}
+                  className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                  title="Copiar URL"
+                >
+                  {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                </button>
+                <a
+                  href={GUIDE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                  title="Abrir enlace"
+                >
+                  <ExternalLink size={14} />
+                </a>
+              </div>
             </div>
+            {copied && (
+              <p className="text-[11px] text-emerald-400 mt-1.5">¡Copiado al portapapeles!</p>
+            )}
             <p className="text-[11px] lg:text-xs text-slate-500 mt-2">
               También puedes usar la URL raw de GitHub:{' '}
               <code className="text-slate-400 break-all">
