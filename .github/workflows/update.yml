@@ -26,11 +26,14 @@ jobs:
       - name: Grab EPG data
         run: npm run grab -- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --maxConnections=3 --days=2 --timeout=10000
 
+      - name: Copy guide.xml to frontend
+        run: cp guide.xml frontend/dist/guide.xml
+
       - name: Commit and push
         run: |
           git config user.name "epg-bot[bot]"
           git config user.email "41898282+epg-bot[bot]@users.noreply.github.com"
-          git add -f guide.xml
+          git add -f guide.xml frontend/dist/guide.xml
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "[BOT] Update EPG guide"
           git push

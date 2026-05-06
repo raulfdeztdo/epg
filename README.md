@@ -4,10 +4,26 @@
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/raulfdeztdo/epg/actions)
 [![Node.js](https://img.shields.io/badge/Node.js_22-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Jest](https://img.shields.io/badge/Jest-C21325?logo=jest&logoColor=white)](https://jestjs.io/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![XMLTV](https://img.shields.io/badge/XMLTV-format-orange)](https://wiki.xmltv.org/)
 
 Fork simplificado de [iptv-org/epg](https://github.com/iptv-org/epg) para descargar la guia de programacion (EPG) de canales de television en España.
+
+### 🌐 [Dashboard en vivo](https://epg-spain.netlify.app/) · [guide.xml](https://epg-spain.netlify.app/guide.xml)
+
+## Dashboard web
+
+El proyecto incluye un dashboard web completo construido con React, TypeScript y Tailwind CSS:
+
+| Funcionalidad | Descripcion |
+| --- | --- |
+| **Dashboard** | Metricas clave: canales, programas, cobertura, desglose por fuente, top categorias, densidad horaria |
+| **Guia TV** | Timeline interactivo de 48h con scroll, filtro por fuente, busqueda, modal con detalles de cada programa |
+| **Canales** | Listado de los 183 canales agrupados por fuente, con busqueda e indicador de emision actual |
+| **Info** | Fuentes de datos, horario de actualizacion, reproductores compatibles, enlaces utiles |
+
+El dashboard se despliega automaticamente en Netlify junto con el `guide.xml`.
 
 ## Fuentes soportadas
 
@@ -24,7 +40,9 @@ Fork simplificado de [iptv-org/epg](https://github.com/iptv-org/epg) para descar
 1. Un **GitHub Action** (`update.yml`) se ejecuta automaticamente cada dia a las 05:00 (hora de Madrid)
 2. Lee el fichero de canales y, segun el atributo `site` de cada canal, utiliza el parser correspondiente para obtener la programacion
 3. Genera un fichero `guide.xml` en formato XMLTV con la programacion de los proximos 2 dias
-4. Hace commit y push automaticamente del fichero actualizado
+4. Copia el `guide.xml` al directorio `frontend/dist/` para que el dashboard lo sirva
+5. Hace commit y push automaticamente de los ficheros actualizados
+6. Netlify detecta el push y despliega el dashboard + guide.xml
 
 ## Estructura del proyecto
 
@@ -33,6 +51,16 @@ epg/
 ├── .agents/skills/             # Skills para agentes IA (web-scraping, xmltv, jest...)
 ├── .github/workflows/
 │   └── update.yml              # Workflow programado (cron diario)
+├── frontend/
+│   ├── src/
+│   │   ├── components/         # Layout, Sidebar, MobileNav, Footer
+│   │   ├── data/               # Mapping canales → fuentes
+│   │   ├── hooks/              # useEpgData (fetch + parse XMLTV)
+│   │   ├── pages/              # Dashboard, Guide, Channels, About
+│   │   └── utils/              # Parser XMLTV (DOMParser)
+│   ├── dist/                   # Build de produccion (commiteado)
+│   ├── package.json
+│   └── vite.config.ts          # Vite + React + Tailwind CSS
 ├── scripts/
 │   ├── commands/
 │   │   ├── epg/grab.ts         # Comando principal: descarga la EPG
@@ -49,6 +77,7 @@ epg/
 │   └── programacion-tv.elpais.com/ # Parser + canales de El Pais
 ├── tests/                      # Tests (Jest)
 ├── guide.xml                   # Salida generada (XMLTV) - en .gitignore
+├── netlify.toml                # Config de despliegue
 ├── package.json
 └── tsconfig.json
 ```
@@ -94,7 +123,26 @@ Esto genera el fichero `guide.xml` en el directorio raiz.
 npm run grab -- --site=orangetv.orange.es
 ```
 
-### Opciones disponibles
+### Dashboard (desarrollo)
+
+```sh
+cd frontend
+npm install
+npm run dev
+```
+
+El servidor de desarrollo arranca en `http://localhost:5173` y carga `guide.xml` desde la raiz del proyecto.
+
+Para compilar el dashboard para produccion:
+
+```sh
+cd frontend
+npm run build
+```
+
+> El plugin de Vite copia automaticamente `guide.xml` al directorio `dist/` durante el build.
+
+### Opciones del grab
 
 ```
 Opciones:
@@ -139,17 +187,21 @@ El fichero `guide.xml` generado esta en formato [XMLTV](https://wiki.xmltv.org/i
 - **Kodi** (PVR IPTV Simple Client)
 - **TiviMate**
 - **Plex** (con plugin XMLTV)
+- **VLC**
 - Cualquier reproductor IPTV que soporte guias EPG en formato XMLTV
 
-La URL directa al fichero raw desde GitHub:
+### URLs disponibles
 
 ```
+https://epg-spain.netlify.app/guide.xml
 https://raw.githubusercontent.com/raulfdeztdo/epg/main/guide.xml
 ```
 
 ## Origen
 
 Fork de [iptv-org/epg](https://github.com/iptv-org/epg), simplificado para mantener unicamente las fuentes de TV en España.
+
+Creado por [raulfdeztdo](https://github.com/raulfdeztdo).
 
 ## Licencia
 
