@@ -31,7 +31,7 @@
     "@alex_neo/jest-expect-message": "^1.0.5",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
-    "@freearhey/core": "^0.10.3",
+    "@freearhey/core": "^0.16.1",
     "@ntlab/sfetch": "^1.2.0",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@swc/core": "^1.15.30",
