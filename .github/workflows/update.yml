@@ -7,18 +7,14 @@ on:
 
 jobs:
   grab:
-    runs-on: ubuntu-latest
+    # Runner self-hosted en Hepha (Raspberry Pi). Node 22 del sistema
+    # (/usr/local/bin), por eso no usamos actions/setup-node.
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_TOKEN }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "npm"
 
       - name: Install dependencies
         run: npm install
