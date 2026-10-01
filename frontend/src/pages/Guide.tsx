@@ -1,13 +1,20 @@
 import { useMemo, useState, useRef, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Search, X, ChevronRight, Play, ExternalLink } from 'lucide-react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Search, X, ChevronRight, Play, ExternalLink, LayoutGrid, ChartGantt } from 'lucide-react'
 import { useEpgData } from '../hooks/useEpgData'
+import { useLineup } from '../hooks/useLineup'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
+import ChannelGrid from '../components/ChannelGrid'
 import { SOURCE_INFO, type SourceName } from '../data/channelSources'
 import { getProgrammesOnNow } from '../utils/parseGuide'
 import type { Programme } from '../utils/parseGuide'
 
 const PX_PER_HOUR = 160
 const HOUR_HEIGHT = 44
+const DATA_REFRESH_MS = 5 * 60 * 1000
+const CLOCK_TICK_MS = 60 * 1000
+
+type GuideView = 'grid' | 'timeline'
 
 function formatHour(date: Date): string {
   return `${String(date.getHours()).padStart(2, '0')}:00`
@@ -18,8 +25,14 @@ function formatTime(date: Date): string {
 }
 
 export default function Guide() {
-  const { data, loading, error } = useEpgData()
+  const { data, loading, error } = useEpgData({ refreshInterval: DATA_REFRESH_MS })
+  const { lineup, loading: lineupLoading } = useLineup(DATA_REFRESH_MS)
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const view: GuideView = searchParams.get('vista') === 'timeline' ? 'timeline' : 'grid'
+  const [now, setNow] = useState(() => Date.now())
+  const tick = useCallback(() => setNow(Date.now()), [])
+  useAutoRefresh(tick, CLOCK_TICK_MS)
   const [sourceFilter, setSourceFilter] = useState<SourceName | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProgramme, setSelectedProgramme] = useState<Programme | null>(null)
@@ -85,25 +98,50 @@ export default function Guide() {
       }
     }, [data, sourceFilter, searchQuery])
 
+  // The grid only shows the channels of the lineup, so count those
+  const visibleChannelCount = useMemo(() => {
+    if (view !== 'grid' || !lineup) return filteredChannels.length
+    const lineupIds = new Set(lineup.groups.flatMap(group => group.channels))
+    return filteredChannels.filter(channel => lineupIds.has(channel.id)).length
+  }, [view, lineup, filteredChannels])
+
   const totalWidth = useMemo(() => {
     return (timelineEnd.getTime() - timelineStart.getTime()) * (PX_PER_HOUR / (1000 * 60 * 60))
   }, [timelineStart, timelineEnd])
 
   const nowPosition = useMemo(() => {
-    const now = Date.now()
     return (now - timelineStart.getTime()) * (PX_PER_HOUR / (1000 * 60 * 60))
-  }, [timelineStart])
+  }, [now, timelineStart])
 
   const onNowProgrammes = useMemo(() => {
     return getProgrammesOnNow(filteredProgrammes)
-  }, [filteredProgrammes])
+  }, [filteredProgrammes, now])
 
+  // Centre the timeline on "now" when it is shown, not on every clock tick or data refresh
+  const nowPositionRef = useRef(nowPosition)
   useEffect(() => {
-    if (data && scrollContainerRef.current && nowPosition > 0) {
+    nowPositionRef.current = nowPosition
+  }, [nowPosition])
+
+  const hasData = data !== null
+  useEffect(() => {
+    if (view === 'timeline' && hasData && scrollContainerRef.current && nowPositionRef.current > 0) {
       const containerWidth = scrollContainerRef.current.clientWidth
-      scrollContainerRef.current.scrollLeft = nowPosition - containerWidth / 4
+      scrollContainerRef.current.scrollLeft = nowPositionRef.current - containerWidth / 4
     }
-  }, [data, nowPosition])
+  }, [view, hasData])
+
+  const setView = (next: GuideView) => {
+    setSearchParams(
+      prev => {
+        const params = new URLSearchParams(prev)
+        if (next === 'grid') params.delete('vista')
+        else params.set('vista', next)
+        return params
+      },
+      { replace: true }
+    )
+  }
 
   const handleMainScroll = useCallback(() => {
     if (scrollContainerRef.current && channelListRef.current) {
@@ -131,12 +169,11 @@ export default function Guide() {
   }, [timelineStart, timelineEnd])
 
   const isNow = (prog: Programme): boolean => {
-    const now = Date.now()
     return prog.startDate.getTime() <= now && prog.stopDate.getTime() >= now
   }
 
   const isPast = (prog: Programme): boolean => {
-    return prog.stopDate.getTime() < Date.now()
+    return prog.stopDate.getTime() < now
   }
 
   const scrollToNow = () => {
@@ -149,7 +186,7 @@ export default function Guide() {
     }
   }
 
-  if (loading) {
+  if (loading || (view === 'grid' && lineupLoading)) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center gap-4">
@@ -175,6 +212,29 @@ export default function Guide() {
     <div className="flex flex-col h-full">
       {/* Filters bar */}
       <div className="flex items-center gap-2 lg:gap-4 px-3 lg:px-4 py-2 lg:py-3 border-b border-slate-800 bg-slate-950 shrink-0 overflow-x-auto no-scrollbar">
+        {/* View switch */}
+        <div className="flex items-center gap-1 bg-slate-900 rounded-lg p-0.5 shrink-0">
+          {(
+            [
+              { key: 'grid', label: 'Parrilla', Icon: LayoutGrid },
+              { key: 'timeline', label: 'Línea de tiempo', Icon: ChartGantt }
+            ] as const
+          ).map(({ key, label, Icon }) => (
+            <button
+              key={key}
+              onClick={() => setView(key)}
+              title={label}
+              aria-pressed={view === key}
+              className={`flex items-center gap-1.5 px-2 lg:px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+                view === key ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Icon size={14} />
+              <span className="hidden sm:inline">{label}</span>
+            </button>
+          ))}
+        </div>
+
         {/* Source filter */}
         <div className="flex items-center gap-1 bg-slate-900 rounded-lg p-0.5 shrink-0">
           {(['all', ...Object.keys(SOURCE_INFO)] as Array<'all' | SourceName>).map(key => {
@@ -214,231 +274,249 @@ export default function Guide() {
           )}
         </div>
 
-        {/* Now button - desktop only */}
+        {/* Now button - desktop timeline only */}
         <button
           onClick={scrollToNow}
-          className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-600/20 text-red-400 hover:bg-red-600/30 transition-colors shrink-0"
+          className={`${view === 'timeline' ? 'lg:flex' : ''} hidden items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-600/20 text-red-400 hover:bg-red-600/30 transition-colors shrink-0`}
         >
           <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
           Ahora
         </button>
 
         <span className="text-xs text-slate-500 ml-auto shrink-0 hidden sm:block">
-          {filteredProgrammes.length.toLocaleString()} prog &middot; {filteredChannels.length} canales
+          {filteredProgrammes.length.toLocaleString()} prog &middot; {visibleChannelCount} canales
         </span>
       </div>
 
+      {/* === GRID: Channels grouped like the M3U list === */}
+      {view === 'grid' && data && (
+        <div className="flex-1 overflow-y-auto">
+          <ChannelGrid
+            channels={filteredChannels}
+            lineup={lineup}
+            programmesByChannel={data.programmesByChannel}
+            now={now}
+            searching={searchQuery.trim() !== ''}
+            onSelectProgramme={setSelectedProgramme}
+          />
+        </div>
+      )}
+
       {/* === DESKTOP: Timeline grid === */}
-      <div className="hidden lg:flex flex-1 overflow-hidden">
-        <div
-          ref={channelListRef}
-          onScroll={handleChannelScroll}
-          className="w-48 shrink-0 overflow-y-auto overflow-x-hidden bg-slate-950 border-r border-slate-800 no-scrollbar"
-          style={{ scrollbarWidth: 'none' }}
-        >
-          <div style={{ height: HOUR_HEIGHT }} className="border-b border-slate-800" />
-          {filteredChannels.map(channel => (
-            <div
-              key={channel.id}
-              className="flex items-center h-12 px-3 border-b border-slate-800/50 hover:bg-slate-900/50"
-            >
-              <button
-                onClick={() => navigate(`/channel/${channel.id}`)}
-                className="text-xs text-white truncate font-medium hover:text-blue-400 transition-colors text-left w-full flex items-center gap-1.5"
+      {view === 'timeline' && (
+        <div className="hidden lg:flex flex-1 overflow-hidden">
+          <div
+            ref={channelListRef}
+            onScroll={handleChannelScroll}
+            className="w-48 shrink-0 overflow-y-auto overflow-x-hidden bg-slate-950 border-r border-slate-800 no-scrollbar"
+            style={{ scrollbarWidth: 'none' }}
+          >
+            <div style={{ height: HOUR_HEIGHT }} className="border-b border-slate-800" />
+            {filteredChannels.map(channel => (
+              <div
+                key={channel.id}
+                className="flex items-center h-12 px-3 border-b border-slate-800/50 hover:bg-slate-900/50"
               >
-                {channel.name}
-                <ExternalLink size={10} className="text-slate-600 shrink-0" />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <div
-          ref={scrollContainerRef}
-          className="flex-1 overflow-auto"
-          onScroll={handleMainScroll}
-        >
-          <div className="relative" style={{ width: totalWidth + 200, minWidth: '100%' }}>
-            <div
-              className="sticky top-0 z-10 bg-slate-950 border-b border-slate-800"
-              style={{ height: HOUR_HEIGHT }}
-            >
-              {hourMarkers.map(marker => (
-                <div
-                  key={marker.hour.toISOString()}
-                  className="absolute top-0 flex flex-col items-center"
-                  style={{ left: marker.left }}
+                <button
+                  onClick={() => navigate(`/channel/${channel.id}`)}
+                  className="text-xs text-white truncate font-medium hover:text-blue-400 transition-colors text-left w-full flex items-center gap-1.5"
                 >
-                  <div className="w-px h-3 bg-slate-600" />
-                  <span className="text-[10px] text-slate-500 mt-1 tabular-nums">
-                    {formatHour(marker.hour)}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div
-              className="absolute top-0 bottom-0 z-20 pointer-events-none"
-              style={{ left: nowPosition }}
-            >
-              <div className="absolute top-0 w-px h-full bg-red-500 animate-pulse-line" />
-              <div className="absolute top-0 -translate-x-1/2 px-1.5 py-0.5 rounded bg-red-500 text-[10px] font-bold text-white whitespace-nowrap">
-                {formatTime(new Date())}
+                  {channel.name}
+                  <ExternalLink size={10} className="text-slate-600 shrink-0" />
+                </button>
               </div>
-            </div>
-
-            {filteredChannels.map(channel => {
-              const channelProgs = programmesByChannel.get(channel.id) || []
-              return (
-                <div key={channel.id} className="relative h-12 border-b border-slate-800/50">
-                  {channelProgs.map(prog => {
-                    const left =
-                      (prog.startDate.getTime() - timelineStart.getTime()) *
-                      (PX_PER_HOUR / (1000 * 60 * 60))
-                    const width = Math.max(
-                      (prog.stopDate.getTime() - prog.startDate.getTime()) *
-                        (PX_PER_HOUR / (1000 * 60 * 60)),
-                      4
-                    )
-                    const isOnAir = isNow(prog)
-                    return (
-                      <button
-                        key={`${prog.channelId}-${prog.start}`}
-                        onClick={() => setSelectedProgramme(prog)}
-                        className={`absolute top-0.5 bottom-0.5 rounded-md px-2 flex items-center overflow-hidden text-left transition-opacity hover:opacity-90 animate-fade-in ${
-                          isOnAir
-                            ? 'bg-red-600/20 border border-red-600/40'
-                            : 'bg-slate-800/80 border border-slate-700/50 hover:border-slate-600'
-                        }`}
-                        style={{ left: Math.max(0, left), width: Math.min(width, totalWidth - left + 200) }}
-                      >
-                        <span className={`text-xs truncate font-medium ${isOnAir ? 'text-red-300' : 'text-slate-300'}`}>
-                          {prog.title}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* === MOBILE: Vertical channel list === */}
-      <div className="lg:hidden flex-1 overflow-y-auto">
-        {/* On now section */}
-        <div className="px-4 py-3">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-            <h3 className="text-sm font-semibold text-white">Ahora en TV</h3>
-            <span className="text-xs text-slate-500">{onNowProgrammes.length} en emisión</span>
-          </div>
-          <div className="space-y-1">
-            {onNowProgrammes.slice(0, 6).map(prog => (
-              <button
-                key={`now-${prog.channelId}-${prog.start}`}
-                onClick={() => setSelectedProgramme(prog)}
-                className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors text-left"
-              >
-                <Play size={14} className="text-red-400 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-white truncate font-medium">{prog.title}</p>
-                  <p className="text-[11px] text-slate-500 truncate">
-                    {prog.channelName} · {formatTime(prog.startDate)} → {formatTime(prog.stopDate)}
-                  </p>
-                </div>
-              </button>
             ))}
           </div>
-        </div>
 
-        {/* All channels */}
-        <div className="px-4 py-2">
-          <h3 className="text-sm font-semibold text-white mb-3">Todos los canales</h3>
-          <div className="space-y-2">
-            {filteredChannels.map(channel => {
-              const channelProgs = programmesByChannel.get(channel.id) || []
-              const isExpanded = expandedChannel === channel.id
-              const visibleProgs = isExpanded ? channelProgs : channelProgs.slice(0, 3)
-
-              return (
-                <div
-                  key={channel.id}
-                  className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden"
-                >
-                  {/* Channel header */}
-                  <div className="flex items-center border-b border-slate-800/50">
-                    <button
-                      onClick={() => navigate(`/channel/${channel.id}`)}
-                      className="flex-1 flex items-center min-w-0 p-3 hover:bg-slate-800/30 transition-colors text-left"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-xs text-white font-medium truncate hover:text-blue-400 transition-colors">
-                          {channel.name}
-                        </p>
-                        <p className="text-[10px] text-slate-500">
-                          {channelProgs.length} programas
-                        </p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setExpandedChannel(isExpanded ? null : channel.id)}
-                      className="p-3 hover:bg-slate-800/30 transition-colors shrink-0"
-                    >
-                      <ChevronRight
-                        size={14}
-                        className={`text-slate-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                      />
-                    </button>
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 overflow-auto"
+            onScroll={handleMainScroll}
+          >
+            <div className="relative" style={{ width: totalWidth + 200, minWidth: '100%' }}>
+              <div
+                className="sticky top-0 z-10 bg-slate-950 border-b border-slate-800"
+                style={{ height: HOUR_HEIGHT }}
+              >
+                {hourMarkers.map(marker => (
+                  <div
+                    key={marker.hour.toISOString()}
+                    className="absolute top-0 flex flex-col items-center"
+                    style={{ left: marker.left }}
+                  >
+                    <div className="w-px h-3 bg-slate-600" />
+                    <span className="text-[10px] text-slate-500 mt-1 tabular-nums">
+                      {formatHour(marker.hour)}
+                    </span>
                   </div>
+                ))}
+              </div>
 
-                  {/* Programmes */}
-                  <div className="border-t border-slate-800">
-                    {visibleProgs.map(prog => {
+              <div
+                className="absolute top-0 bottom-0 z-20 pointer-events-none"
+                style={{ left: nowPosition }}
+              >
+                <div className="absolute top-0 w-px h-full bg-red-500 animate-pulse-line" />
+                <div className="absolute top-0 -translate-x-1/2 px-1.5 py-0.5 rounded bg-red-500 text-[10px] font-bold text-white whitespace-nowrap">
+                  {formatTime(new Date(now))}
+                </div>
+              </div>
+
+              {filteredChannels.map(channel => {
+                const channelProgs = programmesByChannel.get(channel.id) || []
+                return (
+                  <div key={channel.id} className="relative h-12 border-b border-slate-800/50">
+                    {channelProgs.map(prog => {
+                      const left =
+                        (prog.startDate.getTime() - timelineStart.getTime()) *
+                        (PX_PER_HOUR / (1000 * 60 * 60))
+                      const width = Math.max(
+                        (prog.stopDate.getTime() - prog.startDate.getTime()) *
+                          (PX_PER_HOUR / (1000 * 60 * 60)),
+                        4
+                      )
                       const isOnAir = isNow(prog)
-                      const isOld = isPast(prog)
                       return (
                         <button
                           key={`${prog.channelId}-${prog.start}`}
                           onClick={() => setSelectedProgramme(prog)}
-                          className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-800/30 transition-colors text-left border-b border-slate-800/50 last:border-b-0 ${
-                            isOnAir ? 'bg-red-600/10' : isOld ? 'opacity-50' : ''
+                          className={`absolute top-0.5 bottom-0.5 rounded-md px-2 flex items-center overflow-hidden text-left transition-opacity hover:opacity-90 animate-fade-in ${
+                            isOnAir
+                              ? 'bg-red-600/20 border border-red-600/40'
+                              : 'bg-slate-800/80 border border-slate-700/50 hover:border-slate-600'
                           }`}
+                          style={{ left: Math.max(0, left), width: Math.min(width, totalWidth - left + 200) }}
                         >
-                          {isOnAir ? (
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse shrink-0" />
-                          ) : (
-                            <div className="w-1.5 h-1.5 rounded-full bg-slate-700 shrink-0" />
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <p className={`text-xs truncate ${isOnAir ? 'text-red-300 font-medium' : 'text-slate-300'}`}>
-                              {prog.title}
-                            </p>
-                            <p className="text-[10px] text-slate-500">
-                              {formatTime(prog.startDate)} → {formatTime(prog.stopDate)}
-                            </p>
-                          </div>
+                          <span className={`text-xs truncate font-medium ${isOnAir ? 'text-red-300' : 'text-slate-300'}`}>
+                            {prog.title}
+                          </span>
                         </button>
                       )
                     })}
                   </div>
-
-                  {/* Show more */}
-                  {channelProgs.length > 3 && !isExpanded && (
-                    <button
-                      onClick={() => setExpandedChannel(channel.id)}
-                      className="w-full p-2 text-[11px] text-slate-500 hover:text-slate-300 hover:bg-slate-800/30 transition-colors"
-                    >
-                      Ver {channelProgs.length - 3} más...
-                    </button>
-                  )}
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* === MOBILE: Vertical channel list === */}
+      {view === 'timeline' && (
+        <div className="lg:hidden flex-1 overflow-y-auto">
+          {/* On now section */}
+          <div className="px-4 py-3">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+              <h3 className="text-sm font-semibold text-white">Ahora en TV</h3>
+              <span className="text-xs text-slate-500">{onNowProgrammes.length} en emisión</span>
+            </div>
+            <div className="space-y-1">
+              {onNowProgrammes.slice(0, 6).map(prog => (
+                <button
+                  key={`now-${prog.channelId}-${prog.start}`}
+                  onClick={() => setSelectedProgramme(prog)}
+                  className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors text-left"
+                >
+                  <Play size={14} className="text-red-400 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-white truncate font-medium">{prog.title}</p>
+                    <p className="text-[11px] text-slate-500 truncate">
+                      {prog.channelName} · {formatTime(prog.startDate)} → {formatTime(prog.stopDate)}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* All channels */}
+          <div className="px-4 py-2">
+            <h3 className="text-sm font-semibold text-white mb-3">Todos los canales</h3>
+            <div className="space-y-2">
+              {filteredChannels.map(channel => {
+                const channelProgs = programmesByChannel.get(channel.id) || []
+                const isExpanded = expandedChannel === channel.id
+                const visibleProgs = isExpanded ? channelProgs : channelProgs.slice(0, 3)
+
+                return (
+                  <div
+                    key={channel.id}
+                    className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden"
+                  >
+                    {/* Channel header */}
+                    <div className="flex items-center border-b border-slate-800/50">
+                      <button
+                        onClick={() => navigate(`/channel/${channel.id}`)}
+                        className="flex-1 flex items-center min-w-0 p-3 hover:bg-slate-800/30 transition-colors text-left"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-xs text-white font-medium truncate hover:text-blue-400 transition-colors">
+                            {channel.name}
+                          </p>
+                          <p className="text-[10px] text-slate-500">
+                            {channelProgs.length} programas
+                          </p>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => setExpandedChannel(isExpanded ? null : channel.id)}
+                        className="p-3 hover:bg-slate-800/30 transition-colors shrink-0"
+                      >
+                        <ChevronRight
+                          size={14}
+                          className={`text-slate-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Programmes */}
+                    <div className="border-t border-slate-800">
+                      {visibleProgs.map(prog => {
+                        const isOnAir = isNow(prog)
+                        const isOld = isPast(prog)
+                        return (
+                          <button
+                            key={`${prog.channelId}-${prog.start}`}
+                            onClick={() => setSelectedProgramme(prog)}
+                            className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-800/30 transition-colors text-left border-b border-slate-800/50 last:border-b-0 ${
+                              isOnAir ? 'bg-red-600/10' : isOld ? 'opacity-50' : ''
+                            }`}
+                          >
+                            {isOnAir ? (
+                              <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse shrink-0" />
+                            ) : (
+                              <div className="w-1.5 h-1.5 rounded-full bg-slate-700 shrink-0" />
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className={`text-xs truncate ${isOnAir ? 'text-red-300 font-medium' : 'text-slate-300'}`}>
+                                {prog.title}
+                              </p>
+                              <p className="text-[10px] text-slate-500">
+                                {formatTime(prog.startDate)} → {formatTime(prog.stopDate)}
+                              </p>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Show more */}
+                    {channelProgs.length > 3 && !isExpanded && (
+                      <button
+                        onClick={() => setExpandedChannel(channel.id)}
+                        className="w-full p-2 text-[11px] text-slate-500 hover:text-slate-300 hover:bg-slate-800/30 transition-colors"
+                      >
+                        Ver {channelProgs.length - 3} más...
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Programme detail modal */}
       {selectedProgramme && (
@@ -527,6 +605,14 @@ export default function Guide() {
                     <p className="text-sm text-slate-300">{credit.items.join(', ')}</p>
                   </div>
                 ))}
+
+              <button
+                onClick={() => navigate(`/channel/${selectedProgramme.channelId}`)}
+                className="flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                Ver programación de {selectedProgramme.channelName}
+                <ExternalLink size={13} />
+              </button>
 
               {selectedProgramme.icon && (
                 <div>
