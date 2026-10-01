@@ -22,14 +22,25 @@ jobs:
       - name: Grab EPG data
         run: npm run grab -- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --maxConnections=3 --days=2 --timeout=10000
 
-      - name: Copy guide.xml to frontend
-        run: cp guide.xml frontend/dist/guide.xml
+      # Agrupa y ordena los canales segun la lista M3U privada (secret M3U_URL).
+      # Solo publica grupos, orden y logos: nunca la URL ni los streams.
+      - name: Generate channel lineup
+        continue-on-error: true
+        env:
+          M3U_URL: ${{ secrets.M3U_URL }}
+        run: npm run lineup:generate
+
+      - name: Copy data files to frontend
+        run: |
+          cp guide.xml frontend/dist/guide.xml
+          if [ -f lineup.json ]; then cp lineup.json frontend/dist/lineup.json; fi
 
       - name: Commit and push
         run: |
           git config user.name "epg-bot[bot]"
           git config user.email "41898282+epg-bot[bot]@users.noreply.github.com"
           git add -f guide.xml frontend/dist/guide.xml
+          if [ -f frontend/dist/lineup.json ]; then git add -f frontend/dist/lineup.json; fi
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "[BOT] Update EPG guide"
           git push

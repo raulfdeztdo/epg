@@ -5,6 +5,7 @@
     "channels:lint": "tsx scripts/commands/channels/lint.mts",
     "channels:validate": "tsx scripts/commands/channels/validate.ts",
     "grab": "tsx scripts/commands/epg/grab.ts",
+    "lineup:generate": "tsx scripts/commands/lineup/generate.ts",
     "lint": "npx eslint \"{scripts,tests,sites}/**/*.{ts,mts,js}\"",
     "test": "cross-env TZ=Pacific/Nauru npx jest --runInBand",
     "postinstall": "skip-postinstall || npm run api:load"

@@ -3,6 +3,7 @@
 /channels.xml
 /guide.xml
 /guide.xml.gz
+/lineup.json
 
 # macOS
 .DS_Store

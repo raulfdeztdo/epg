@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "npm test": "allow",
+      "npm test *": "allow",
+      "npm run lint": "allow",
+      "npm run lint *": "allow",
+      "npm run grab *": "allow",
+      "npm run channels:lint *": "allow",
+      "npm run channels:validate *": "allow",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "ls*": "allow",
+      "grep *": "allow",
+      "head *": "allow"
+    }
+  }
+}
