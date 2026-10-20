@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-19T08:39:05.039Z",
+  "generatedAt": "2026-10-20T08:20:34.381Z",
   "groups": [
     {
       "name": "ENTRETENIMIENTO",
@@ -182,7 +182,11 @@
         "usop3",
         "usop11",
         "multi8",
-        "multi6"
+        "multi6",
+        "chap1",
+        "chap2",
+        "chap3",
+        "chap4"
       ]
     },
     {
