@@ -1,3 +1,11 @@
 [build]
   command = "echo 'No build needed - pre-built frontend committed to repo'"
   publish = "frontend/dist"
+
+# guide.xml pesa 4 MB y lo descargan muchos clientes: se sirve desde GitHub para no gastar el
+# ancho de banda de Netlify, y esta URL publica sigue funcionando.
+[[redirects]]
+  from = "/guide.xml"
+  to = "https://raw.githubusercontent.com/raulfdeztdo/epg/main/guide.xml"
+  status = 302
+  force = true
