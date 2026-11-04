@@ -53,6 +53,7 @@ epg/
 ├── lineup.json                 # Salida generada (grupos y orden de canales) - en .gitignore
 ├── AGENTS.md                   # Instrucciones para agentes (fuente unica)
 ├── opencode.json               # Configuracion de OpenCode (permisos)
+├── netlify/edge-functions/     # Bloqueo de clientes abusivos de guide.xml
 ├── netlify.toml                # Publica frontend/dist sin build
 ├── package.json
 └── tsconfig.json
@@ -183,3 +184,6 @@ Reglas de mantenimiento:
   al lineup. No los tomes como regresion de tus cambios; comprueba que el numero no aumenta.
 - `guide.xml` contiene algunos programas duplicados (mismo canal y hora de inicio). En la linea de
   tiempo de la Guia TV generan avisos de claves duplicadas de React en la consola.
+- El User-Agent `OTT-TV/*` agotaba el ancho de banda del plan Free de Netlify, compartido con otros
+  sitios de la cuenta. `netlify/edge-functions/block-guide-clients.ts` le responde 403 en
+  `/guide.xml`. Para bloquear otro cliente, amplia el filtro `header` de su `config`.
