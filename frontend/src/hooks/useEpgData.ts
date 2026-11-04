@@ -35,8 +35,8 @@ export function useEpgData({ refreshInterval }: UseEpgDataOptions = {}): UseEpgD
       if (background && version && version === versionRef.current) return
 
       const text = await response.text()
-      const contentLength = response.headers.get('content-length')
-      const fileSize = contentLength ? parseInt(contentLength) : new Blob([text]).size
+      // Content-Length can't be used: GitHub compresses the guide, so it reports the gzipped size
+      const fileSize = new Blob([text]).size
 
       versionRef.current = version
       setData(parseGuideXml(text, fileSize))
