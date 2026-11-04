@@ -54,7 +54,7 @@ epg/
 ├── AGENTS.md                   # Instrucciones para agentes (fuente unica)
 ├── opencode.json               # Configuracion de OpenCode (permisos)
 ├── netlify/edge-functions/     # Bloqueo de clientes abusivos de guide.xml
-├── netlify.toml                # Publica frontend/dist sin build
+├── netlify.toml                # Publica frontend/dist sin build y redirige guide.xml a GitHub
 ├── package.json
 └── tsconfig.json
 ```
@@ -187,3 +187,7 @@ Reglas de mantenimiento:
 - El User-Agent `OTT-TV/*` agotaba el ancho de banda del plan Free de Netlify, compartido con otros
   sitios de la cuenta. `netlify/edge-functions/block-guide-clients.ts` le responde 403 en
   `/guide.xml`. Para bloquear otro cliente, amplia el filtro `header` de su `config`.
+- `netlify.toml` redirige `/guide.xml` a la copia de GitHub para no gastar ese ancho de banda. La URL
+  de Netlify debe seguir funcionando porque hay listas IPTV que la usan, pero en el README y en la
+  web se anuncia solo la de GitHub (`frontend/src/constants.ts`). `frontend/dist/guide.xml` se sigue
+  copiando, pero la redireccion lo oculta.

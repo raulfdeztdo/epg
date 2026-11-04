@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Github, Rss, Clock, Server, Monitor, Tv, Code, Copy, ExternalLink, Check } from 'lucide-react'
 import Footer from '../components/Footer'
-
-const GUIDE_URL = 'https://epg-spain.netlify.app/guide.xml'
+import { GUIDE_URL } from '../constants'
 
 const PLAYERS = [
   {
@@ -172,12 +171,6 @@ export default function About() {
             {copied && (
               <p className="text-[11px] text-emerald-400 mt-1.5">¡Copiado al portapapeles!</p>
             )}
-            <p className="text-[11px] lg:text-xs text-slate-500 mt-2">
-              También puedes usar la URL raw de GitHub:{' '}
-              <code className="text-slate-400 break-all">
-                https://raw.githubusercontent.com/raulfdeztdo/epg/main/guide.xml
-              </code>
-            </p>
           </div>
         </div>
       </div>
@@ -227,7 +220,9 @@ export default function About() {
                 Código fuente en GitHub
               </a>
               <a
-                href="/guide.xml"
+                href={GUIDE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-2 text-xs lg:text-sm text-slate-400 hover:text-white transition-colors"
               >
                 <Rss size={14} className="lg:size-4" />

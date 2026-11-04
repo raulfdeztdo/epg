@@ -10,7 +10,7 @@
 
 Fork simplificado de [iptv-org/epg](https://github.com/iptv-org/epg) para descargar la guia de programacion (EPG) de canales de television en España.
 
-### 🌐 [Dashboard en vivo](https://epg-spain.netlify.app/) · [guide.xml](https://epg-spain.netlify.app/guide.xml)
+### 🌐 [Dashboard en vivo](https://epg-spain.netlify.app/) · [guide.xml](https://raw.githubusercontent.com/raulfdeztdo/epg/main/guide.xml)
 
 ## Dashboard web
 
@@ -29,7 +29,7 @@ La **Guia TV** abre por defecto en una parrilla al estilo Movistar+: una tarjeta
 - La vista de linea de tiempo sigue disponible con el selector de vista (`#/guide?vista=timeline`).
 - Mientras la Guia TV esta abierta, los datos se refrescan cada 5 minutos.
 
-El dashboard se despliega automaticamente en Netlify junto con el `guide.xml` y el `lineup.json`.
+El dashboard se despliega automaticamente en Netlify junto con el `lineup.json`, y carga el `guide.xml` desde GitHub.
 
 ## Fuentes soportadas
 
@@ -47,9 +47,9 @@ El dashboard se despliega automaticamente en Netlify junto con el `guide.xml` y 
 2. Lee el fichero de canales y, segun el atributo `site` de cada canal, utiliza el parser correspondiente para obtener la programacion
 3. Genera un fichero `guide.xml` en formato XMLTV con la programacion de los proximos 2 dias
 4. Genera `lineup.json` con los grupos y el orden de canales de la lista M3U privada
-5. Copia `guide.xml` y `lineup.json` al directorio `frontend/dist/` para que el dashboard los sirva
-6. Hace commit y push automaticamente de los ficheros actualizados
-7. Netlify detecta el push y despliega el dashboard, `guide.xml` y `lineup.json`
+5. Copia `guide.xml` y `lineup.json` al directorio `frontend/dist/`
+6. Hace commit y push automaticamente de los ficheros actualizados, con lo que `guide.xml` queda disponible en GitHub
+7. Netlify detecta el push y despliega el dashboard y `lineup.json`
 
 ## Estructura del proyecto
 
@@ -228,10 +228,11 @@ El fichero `guide.xml` generado esta en formato [XMLTV](https://wiki.xmltv.org/i
 - **VLC**
 - Cualquier reproductor IPTV que soporte guias EPG en formato XMLTV
 
-### URLs disponibles
+### URL de la guia
+
+La guia es publica y gratuita:
 
 ```
-https://epg-spain.netlify.app/guide.xml
 https://raw.githubusercontent.com/raulfdeztdo/epg/main/guide.xml
 ```
 
