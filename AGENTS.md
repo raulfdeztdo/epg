@@ -188,5 +188,6 @@ Reglas de mantenimiento:
   sitios de la cuenta. `netlify/edge-functions/block-guide-clients.ts` le responde 403 en
   `/guide.xml`. Para bloquear otro cliente, amplia el filtro `header` de su `config`.
 - `netlify.toml` redirige `/guide.xml` a la copia de GitHub para no gastar ese ancho de banda. La URL
-  de Netlify debe seguir funcionando porque hay listas IPTV que la usan. `frontend/dist/guide.xml`
-  se sigue copiando, pero la redireccion lo oculta.
+  de Netlify debe seguir funcionando porque hay listas IPTV que la usan, pero en el README y en la
+  web se anuncia solo la de GitHub (`frontend/src/constants.ts`). `frontend/dist/guide.xml` se sigue
+  copiando, pero la redireccion lo oculta.

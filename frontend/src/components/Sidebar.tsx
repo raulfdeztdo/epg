@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, Tv, List, Info, Github } from 'lucide-react'
+import { GUIDE_URL } from '../constants'
 
 const links = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -43,9 +44,10 @@ export default function Sidebar() {
 
       <div className="p-4 space-y-3 border-t border-slate-800">
         <a
-          href="/guide.xml"
+          href={GUIDE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 w-full px-3 py-2 text-xs font-medium text-slate-400 border border-slate-700 rounded-lg hover:border-slate-600 hover:text-white transition-colors"
-          download
         >
           ⬇ guide.xml
         </a>

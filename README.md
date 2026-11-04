@@ -10,7 +10,7 @@
 
 Fork simplificado de [iptv-org/epg](https://github.com/iptv-org/epg) para descargar la guia de programacion (EPG) de canales de television en España.
 
-### 🌐 [Dashboard en vivo](https://epg-spain.netlify.app/) · [guide.xml](https://epg-spain.netlify.app/guide.xml)
+### 🌐 [Dashboard en vivo](https://epg-spain.netlify.app/) · [guide.xml](https://raw.githubusercontent.com/raulfdeztdo/epg/main/guide.xml)
 
 ## Dashboard web
 
@@ -49,7 +49,7 @@ El dashboard se despliega automaticamente en Netlify junto con el `lineup.json`,
 4. Genera `lineup.json` con los grupos y el orden de canales de la lista M3U privada
 5. Copia `guide.xml` y `lineup.json` al directorio `frontend/dist/`
 6. Hace commit y push automaticamente de los ficheros actualizados, con lo que `guide.xml` queda disponible en GitHub
-7. Netlify detecta el push y despliega el dashboard y `lineup.json`; su URL de `guide.xml` redirige a GitHub
+7. Netlify detecta el push y despliega el dashboard y `lineup.json`
 
 ## Estructura del proyecto
 
@@ -228,18 +228,13 @@ El fichero `guide.xml` generado esta en formato [XMLTV](https://wiki.xmltv.org/i
 - **VLC**
 - Cualquier reproductor IPTV que soporte guias EPG en formato XMLTV
 
-### URLs disponibles
+### URL de la guia
 
-La guia es publica y gratuita. Puedes usar cualquiera de estas dos URLs:
+La guia es publica y gratuita:
 
 ```
-https://epg-spain.netlify.app/guide.xml
 https://raw.githubusercontent.com/raulfdeztdo/epg/main/guide.xml
 ```
-
-La URL de Netlify sigue funcionando y no hace falta cambiarla en las listas IPTV que ya la usan: redirige (HTTP 302) a la de GitHub, que es la que sirve el fichero, para no gastar el ancho de banda gratuito de Netlify. El reproductor o cliente debe seguir redirecciones (con `curl`, usa la opcion `-L`). Si configuras una lista nueva, la URL de GitHub evita ese paso.
-
-Los clientes `OTT-TV` reciben un error 403 en la URL de Netlify, porque agotaban su ancho de banda gratuito. Pueden usar la URL de GitHub.
 
 ## Origen
 
