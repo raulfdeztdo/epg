@@ -93,12 +93,16 @@ sites/<dominio>/
   `workflow_dispatch`.
 - Corre en un runner self-hosted (Raspberry Pi "Hepha") con el Node 22 del sistema, por eso no
   usa `actions/setup-node`.
-- Pasos: `npm install` -> grab -> `npm run lineup:generate` -> copia `guide.xml` y `lineup.json`
-  a `frontend/dist/` -> commit y push.
+- Pasos: `npm ci --ignore-scripts` + `npm run api:load` -> grab -> `npm run lineup:generate` ->
+  copia `guide.xml` y `lineup.json` a `frontend/dist/` -> commit -> push (solo si hay commit).
 - El paso del lineup usa el secret `M3U_URL` y tiene `continue-on-error`: si falla, se mantiene
   el `lineup.json` anterior.
 - Solo hace `git add -f` de `guide.xml`, `frontend/dist/guide.xml` y `frontend/dist/lineup.json`
   (nunca `git add .`). Netlify despliega `frontend/dist` en cada push.
+- Cadena de suministro: `actions/checkout` va fijado por SHA y con `persist-credentials: false`, el
+  `GITHUB_TOKEN` solo tiene `contents: read`, y `GH_TOKEN` solo llega al paso de push. No lo pases
+  a pasos que ejecuten codigo de dependencias. `--ignore-scripts` omite el `postinstall`, por eso
+  `api:load` se lanza a mano: `temp/data` hace falta para el grab.
 - Secrets necesarios: `GH_TOKEN` (PAT con permisos de push) y `M3U_URL` (URL de la lista M3U).
 
 ## Skills disponibles

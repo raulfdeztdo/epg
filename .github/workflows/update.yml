@@ -5,6 +5,11 @@ on:
   schedule:
     - cron: "0 3 * * *" # Todos los dias a las 05:00 (Europa/Madrid)
 
+# El GITHUB_TOKEN solo se usa para clonar. El push usa el PAT de GH_TOKEN, al que
+# este bloque no afecta.
+permissions:
+  contents: read
+
 jobs:
   grab:
     # Runner self-hosted en Hepha (Raspberry Pi). Node 22 del sistema
@@ -12,12 +17,16 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          persist-credentials: false
 
+      # Sin scripts de instalacion de dependencias. El unico que necesitamos es el
+      # postinstall propio, que descarga temp/data y aqui se lanza de forma explicita.
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm ci --ignore-scripts
+          npm run api:load
 
       - name: Grab EPG data
         run: npm run grab -- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --maxConnections=3 --days=2 --timeout=10000
@@ -35,12 +44,25 @@ jobs:
           cp guide.xml frontend/dist/guide.xml
           if [ -f lineup.json ]; then cp lineup.json frontend/dist/lineup.json; fi
 
-      - name: Commit and push
+      - name: Commit
+        id: commit
         run: |
           git config user.name "epg-bot[bot]"
           git config user.email "41898282+epg-bot[bot]@users.noreply.github.com"
           git add -f guide.xml frontend/dist/guide.xml
           if [ -f frontend/dist/lineup.json ]; then git add -f frontend/dist/lineup.json; fi
           git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "[BOT] Update EPG guide"
-          git push
+          git -c core.hooksPath=/dev/null commit -m "[BOT] Update EPG guide"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # Unico paso con GH_TOKEN. El token llega por entorno, no queda en .git/config
+      # ni en la linea de comandos, y se ignoran hooks, helpers y remotos del checkout.
+      - name: Push
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git -c core.hooksPath=/dev/null \
+            -c credential.helper= \
+            -c credential.helper='!f() { echo username=x-access-token; echo "password=${GH_TOKEN}"; }; f' \
+            push "https://github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF}"
