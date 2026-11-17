@@ -77,3 +77,35 @@ it('can handle empty guide', async () => {
 
   expect(results).toMatchObject([])
 })
+
+it('skips programs with impossible times and normalizes titles', async () => {
+  axios.get.mockImplementation(() => Promise.resolve({ data: '' }))
+  const content = `
+    <div id="ele-1"><ul><li class="time">25:00</li><li class="title">Hora imposible</li></ul></div>
+    <div id="ele-2"><ul><li class="time">10:00</li><li class="title">  Partido
+      de   baloncesto </li></ul></div>
+    <div id="ele-3"><ul><li class="time">11:99</li><li class="title">Minuto imposible</li></ul></div>
+  `
+
+  const results = await parser({ content, date })
+
+  expect(results.map(p => p.title)).toEqual(['Partido de baloncesto'])
+  expect(results[0].start.toJSON()).toBe('2025-05-30T08:00:00.000Z')
+  // La hora del siguiente programa es invalida: se usa la duracion por defecto de 2 horas
+  expect(results[0].stop.toJSON()).toBe('2025-05-30T10:00:00.000Z')
+})
+
+it('returns an empty guide when the content cannot be parsed', async () => {
+  const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+  const content = {
+    toString() {
+      throw new Error('contenido corrupto')
+    }
+  }
+
+  const results = await parser({ content, date })
+
+  expect(results).toEqual([])
+  expect(consoleError).toHaveBeenCalledWith('Error parsing Movistar schedule:', 'contenido corrupto')
+  consoleError.mockRestore()
+})
