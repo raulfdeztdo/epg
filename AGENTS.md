@@ -75,6 +75,12 @@ sites/<dominio>/
 
 - **movistarplus.es.channels.xml es el fichero maestro**: contiene canales de las 3 fuentes. Cada `<channel>` tiene un atributo `site` que indica de que fuente obtener datos. El workflow solo ejecuta grab contra este fichero.
 - **movistarplus.es** hace scraping HTML: extrae programas de `div[id^="ele-"]`, obtiene descripciones haciendo peticiones individuales a cada programa. Detecta cruce de medianoche comparando horas consecutivas.
+- **Descubrimiento de canales de Movistar** (`--discover-channels`, activo en el workflow): anade los
+  canales que publica `movistarplus.es/programacion-tv/` y no estan en el fichero maestro
+  (`scripts/commands/epg/movistarChannels.ts`). Se publican con su `site_id` como ID, igual que los
+  canales de Movistar del XML sin `xmltv_id`, asi que el ID no cambia si luego se anaden al XML.
+  Se descartan los que chocan con un ID existente. En estos canales el parser ignora los bloques de
+  relleno cuyo titulo es el nombre del propio canal.
 - **orangetv.orange.es** descarga 3 segmentos JSON de 8 horas cada uno para cubrir las 24h del dia.
 - **programacion-tv.elpais.com** hace 2 llamadas: una para la parrilla diaria y otra para detalles de cada programa.
 
@@ -93,8 +99,8 @@ sites/<dominio>/
   `workflow_dispatch`.
 - Corre en un runner self-hosted (Raspberry Pi "Hepha") con el Node 22 del sistema, por eso no
   usa `actions/setup-node`.
-- Pasos: `npm ci --ignore-scripts` + `npm run api:load` -> grab -> `npm run lineup:generate` ->
-  copia `guide.xml` y `lineup.json` a `frontend/dist/` -> commit -> push (solo si hay commit).
+- Pasos: `npm ci --ignore-scripts` + `npm run api:load` -> grab (con `--discover-channels`) ->
+  `npm run lineup:generate` -> copia `guide.xml` y `lineup.json` a `frontend/dist/` -> commit -> push (solo si hay commit).
 - El paso del lineup usa el secret `M3U_URL` y tiene `continue-on-error`: si falla, se mantiene
   el `lineup.json` anterior.
 - Solo hace `git add -f` de `guide.xml`, `frontend/dist/guide.xml` y `frontend/dist/lineup.json`

@@ -29,7 +29,7 @@ jobs:
           npm run api:load
 
       - name: Grab EPG data
-        run: npm run grab -- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --maxConnections=3 --days=2 --timeout=10000
+        run: npm run grab -- --channels=sites/movistarplus.es/movistarplus.es.channels.xml --discover-channels --maxConnections=3 --days=2 --timeout=10000
 
       # Agrupa y ordena los canales segun la lista M3U privada (secret M3U_URL).
       # Solo publica grupos, orden y logos: nunca la URL ni los streams.
