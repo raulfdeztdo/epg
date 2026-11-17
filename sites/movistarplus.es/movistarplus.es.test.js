@@ -1,4 +1,4 @@
-const { parser, url } = require('./movistarplus.es.config.js')
+const { parser, url, channels } = require('./movistarplus.es.config.js')
 const fs = require('fs')
 const path = require('path')
 const dayjs = require('dayjs')
@@ -108,4 +108,53 @@ it('returns an empty guide when the content cannot be parsed', async () => {
   expect(results).toEqual([])
   expect(consoleError).toHaveBeenCalledWith('Error parsing Movistar schedule:', 'contenido corrupto')
   consoleError.mockRestore()
+})
+
+it('discovers channel links and deduplicates them', async () => {
+  axios.get.mockResolvedValue({
+    data: `
+      <a href="/programacion-tv/MBALCT/"><span>M+ Baloncesto</span></a>
+      <a href="https://www.movistarplus.es/programacion-tv/mbalct"> M+ Baloncesto </a>
+      <a href="/programacion-tv/fecha/2025-05-30">Fecha</a>
+      <a href="/programacion-tv/">Programación TV</a>
+      <a href="/programacion-tv/dazba?foo=bar"><img alt="DAZN Baloncesto" /></a>
+      <a href="https://example.com/programacion-tv/falso">Falso</a>
+    `
+  })
+
+  await expect(channels()).resolves.toEqual([
+    { site_id: 'mbalct', name: 'M+ Baloncesto' },
+    { site_id: 'dazba', name: 'DAZN Baloncesto' }
+  ])
+})
+
+it('returns no channels when the channel page is empty', async () => {
+  axios.get.mockResolvedValue({ data: '' })
+  await expect(channels()).resolves.toEqual([])
+})
+
+it('propagates channel discovery network errors', async () => {
+  axios.get.mockRejectedValue(new Error('network unavailable'))
+  await expect(channels()).rejects.toThrow('network unavailable')
+})
+
+it('drops filler blocks named after a discovered channel', async () => {
+  axios.get.mockResolvedValue({ data: '' })
+  const discoveredChannel = { name: 'M+ Vamos 2', _movistarDiscovered: true }
+  const content = `
+    <div id="ele-1"><ul><li class="time">10:00</li><li class="title">M+ Vamos 2</li></ul></div>
+    <div id="ele-2"><ul><li class="time">12:00</li><li class="title">Partido de baloncesto</li></ul></div>
+    <div id="ele-3"><ul><li class="time">14:00</li><li class="title">M+ VAMOS 2</li></ul></div>
+  `
+
+  const results = await parser({ content, channel: discoveredChannel, date })
+
+  expect(results.map(p => p.title)).toEqual(['Partido de baloncesto'])
+  expect(results[0].start.toJSON()).toBe('2025-05-30T10:00:00.000Z')
+  // Termina cuando empieza el bloque de relleno
+  expect(results[0].stop.toJSON()).toBe('2025-05-30T12:00:00.000Z')
+
+  // En los canales del fichero maestro esos bloques se mantienen
+  const fileResults = await parser({ content, channel: { name: 'M+ Vamos 2' }, date })
+  expect(fileResults).toHaveLength(3)
 })
