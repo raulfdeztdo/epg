@@ -14,10 +14,52 @@ module.exports = {
     return `https://www.movistarplus.es/programacion-tv/${channel.site_id}/${date.format('YYYY-MM-DD')}`
   },
   async parser({ content, date }) {
+    try {
+      return await parsePrograms(content, date)
+    } catch (error) {
+      console.error('Error parsing Movistar schedule:', error.message)
+      return []
+    }
+  },
+  async channels() {
+    const axios = require('axios')
+    const cheerio = require('cheerio')
+
+    const data = await axios.get('https://www.movistarplus.es/programacion-tv/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    })
+
+    const $ = cheerio.load(data.data)
+    const channels = []
+
+    $('a[href*="/programacion-tv/"]').each((i, el) => {
+      const href = $(el).attr('href')
+      if (href && href.includes('/programacion-tv/') && !href.includes('/programacion-tv/fecha/')) {
+        const match = href.match(/\/programacion-tv\/([^/]+)/)
+        if (match) {
+          const channelId = match[1]
+          const name = $(el).text().trim()
+          if (name && channelId !== 'fecha') {
+            channels.push({
+              site_id: channelId,
+              name: name
+            })
+          }
+        }
+      }
+    })
+
+    return channels
+  }
+}
+
+async function parsePrograms(content, date) {
     let programs = []
     if (!content) return programs
-    const $ = cheerio.load(content)
-    
+    const $ = cheerio.load(content.toString())
+
     // Obtener todos los elementos de programas
     const programElements = $('div[id^="ele-"]')
     
@@ -31,7 +73,7 @@ module.exports = {
       const programDiv = $(element)
       
       // Extraer el título directamente del HTML
-      const title = programDiv.find('li.title').text().trim() || 'Sin título'
+      const title = programDiv.find('li.title').text().replace(/\s+/g, ' ').trim() || 'Sin título'
       
       // Extraer la URL del programa para obtener la descripción
       const programUrl = programDiv.find('a').attr('href')
@@ -41,6 +83,9 @@ module.exports = {
       
       if (timeElement && timeElement.match(/^\d{2}:\d{2}$/)) {
         const currentHour = parseInt(timeElement.split(':')[0], 10)
+        const currentMinute = parseInt(timeElement.split(':')[1], 10)
+        // Descartar horas imposibles (p. ej. "25:00" o "10:99")
+        if (currentHour > 23 || currentMinute > 59) return
 
         // Detectar cruce de medianoche: si la hora actual es menor que la anterior
         if (prevHour >= 0 && currentHour < prevHour && prevHour >= 12) {
@@ -60,8 +105,11 @@ module.exports = {
           
           if (nextTimeElement && nextTimeElement.match(/^\d{2}:\d{2}$/)) {
             const nextHour = parseInt(nextTimeElement.split(':')[0], 10)
-            const nextDayOffset = (currentHour >= 12 && nextHour < currentHour) ? dayOffset + 1 : dayOffset
-            endTime = dayjs.tz(date.format('YYYY-MM-DD') + ' ' + nextTimeElement, 'YYYY-MM-DD HH:mm', 'Europe/Madrid').add(nextDayOffset, 'day').utc()
+            const nextMinute = parseInt(nextTimeElement.split(':')[1], 10)
+            if (nextHour < 24 && nextMinute < 60) {
+              const nextDayOffset = (currentHour >= 12 && nextHour < currentHour) ? dayOffset + 1 : dayOffset
+              endTime = dayjs.tz(date.format('YYYY-MM-DD') + ' ' + nextTimeElement, 'YYYY-MM-DD HH:mm', 'Europe/Madrid').add(nextDayOffset, 'day').utc()
+            }
           }
         }
         
@@ -93,39 +141,6 @@ module.exports = {
     })
 
     return programs
-  },
-  async channels() {
-    const axios = require('axios')
-    const cheerio = require('cheerio')
-    
-    const data = await axios.get('https://www.movistarplus.es/programacion-tv/', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
-    })
-    
-    const $ = cheerio.load(data.data)
-    const channels = []
-    
-    $('a[href*="/programacion-tv/"]').each((i, el) => {
-      const href = $(el).attr('href')
-      if (href && href.includes('/programacion-tv/') && !href.includes('/programacion-tv/fecha/')) {
-        const match = href.match(/\/programacion-tv\/([^/]+)/)
-        if (match) {
-          const channelId = match[1]
-          const name = $(el).text().trim()
-          if (name && channelId !== 'fecha') {
-            channels.push({
-              site_id: channelId,
-              name: name
-            })
-          }
-        }
-      }
-    })
-    
-    return channels
-  }
 }
 
 async function getProgramDescription(programUrl) {
