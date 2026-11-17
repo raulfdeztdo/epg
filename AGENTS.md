@@ -12,6 +12,7 @@ npm run lint                                         # ESLint
 npm run channels:lint -- <fichero.channels.xml>      # Validar sintaxis XML de canales
 npm run channels:validate -- <fichero.channels.xml>  # Validar datos de canales
 M3U_URL=<url> npm run lineup:generate                # Genera lineup.json (grupos/orden de la Guia TV)
+npm run aliases:apply                                # Anade los nombres alternativos a guide.xml
 ```
 
 - Ejecuta siempre `npm test` despues de modificar parsers o tests.
@@ -81,6 +82,11 @@ sites/<dominio>/
   canales de Movistar del XML sin `xmltv_id`, asi que el ID no cambia si luego se anaden al XML.
   Se descartan los que chocan con un ID existente. En estos canales el parser ignora los bloques de
   relleno cuyo titulo es el nombre del propio canal.
+- **Nombres alternativos** (`sites/movistarplus.es/movistarplus.es.aliases.json`): asocia un ID de
+  canal de la guia con nombres extra, p. ej. `{ "a3": ["Antena 3 HD"] }`. `npm run aliases:apply`
+  los anade a `guide.xml` como `<display-name>` detras del original (el frontend usa el primero) y
+  antes de `<icon>`/`<url>`, como exige la DTD de XMLTV. No duplica nombres ni cambia IDs. Solo
+  nombres genericos: nunca los `tvg-name` de la lista M3U privada ni el catalogo de un proveedor.
 - **orangetv.orange.es** descarga 3 segmentos JSON de 8 horas cada uno para cubrir las 24h del dia.
 - **programacion-tv.elpais.com** hace 2 llamadas: una para la parrilla diaria y otra para detalles de cada programa.
 
@@ -100,7 +106,8 @@ sites/<dominio>/
 - Corre en un runner self-hosted (Raspberry Pi "Hepha") con el Node 22 del sistema, por eso no
   usa `actions/setup-node`.
 - Pasos: `npm ci --ignore-scripts` + `npm run api:load` -> grab (con `--discover-channels`) ->
-  `npm run lineup:generate` -> copia `guide.xml` y `lineup.json` a `frontend/dist/` -> commit -> push (solo si hay commit).
+  `npm run aliases:apply` -> `npm run lineup:generate` -> copia `guide.xml` y `lineup.json` a
+  `frontend/dist/` -> commit -> push (solo si hay commit).
 - El paso del lineup usa el secret `M3U_URL` y tiene `continue-on-error`: si falla, se mantiene
   el `lineup.json` anterior.
 - Solo hace `git add -f` de `guide.xml`, `frontend/dist/guide.xml` y `frontend/dist/lineup.json`
