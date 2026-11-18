@@ -1,6 +1,7 @@
 {
   "name": "epg",
   "scripts": {
+    "aliases:apply": "tsx scripts/commands/aliases/apply.ts",
     "api:load": "tsx scripts/commands/api/load.ts",
     "channels:lint": "tsx scripts/commands/channels/lint.mts",
     "channels:validate": "tsx scripts/commands/channels/validate.ts",
